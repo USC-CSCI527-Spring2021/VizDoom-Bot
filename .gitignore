@@ -1,0 +1,9 @@
+__pycache__/
+.idea/
+
+*/_vizdoom/
+*/tf_board/
+*/*_ckpt/
+*/logs/
+*saved_model*
+*.mp4
