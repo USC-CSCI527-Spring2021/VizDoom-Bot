@@ -11,7 +11,7 @@ import numpy as np
 
 from common.utils import process_frame
 from common.i_reward_shaper import IRewardShaper
-from typing import List, Tuple
+from typing import List, Tuple, Type
 from gym import spaces
 
 
@@ -27,7 +27,7 @@ class DoomEnv(gym.Env):
             history_length=4,
             visible=False,
             is_sync=True,
-            reward_shaper: IRewardShaper = None,
+            reward_shaper: Type[IRewardShaper] = None,
             screen_format=None,
             use_attention=False,
             attention_ratio=0.5,
@@ -46,8 +46,10 @@ class DoomEnv(gym.Env):
         else:
             game.set_screen_format(screen_format)
         game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
+        self.reward_shaper = None
         if reward_shaper is not None:
-            game.set_available_game_variables(reward_shaper.get_subscribed_game_var_list())
+            self.reward_shaper = reward_shaper()
+            game.set_available_game_variables(self.reward_shaper.get_subscribed_game_var_list())
         game.init()
 
         self.env = game
@@ -55,7 +57,6 @@ class DoomEnv(gym.Env):
         self.preprocess_shape = preprocess_shape
         self.frames_to_skip = frames_to_skip
         self.history_length = history_length
-        self.reward_shaper = reward_shaper
         self.use_attention = use_attention
         self.attention_ratio = attention_ratio
         self.height, self.width = preprocess_shape
