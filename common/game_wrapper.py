@@ -27,20 +27,27 @@ class DoomEnv(gym.Env):
             history_length=4,
             visible=False,
             is_sync=True,
+            is_spec=False,
             reward_shaper: Type[IRewardShaper] = None,
             screen_format=None,
             use_attention=False,
             attention_ratio=0.5,
+            game_args: str = '',
+            game_map: str = '',
+            num_bots: int = 0,
     ):
         super(DoomEnv, self).__init__()
         # vizdoom game init
         game = vzd.DoomGame()
         game.load_config(scenario_cfg_path)
         game.set_window_visible(visible)
-        if is_sync:
-            game.set_mode(vzd.Mode.PLAYER)
+        if is_spec:
+            game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
         else:
-            game.set_mode(vzd.Mode.ASYNC_PLAYER)
+            if is_sync:
+                game.set_mode(vzd.Mode.PLAYER)
+            else:
+                game.set_mode(vzd.Mode.ASYNC_PLAYER)
         if screen_format is None:
             game.set_screen_format(vzd.ScreenFormat.GRAY8)
         else:
@@ -50,6 +57,10 @@ class DoomEnv(gym.Env):
         if reward_shaper is not None:
             self.reward_shaper = reward_shaper()
             game.set_available_game_variables(self.reward_shaper.get_subscribed_game_var_list())
+        if len(game_args) > 0:
+            game.add_game_args(game_args)
+        if len(game_map) > 0:
+            game.set_doom_map(game_map)
         game.init()
 
         self.env = game
@@ -61,6 +72,7 @@ class DoomEnv(gym.Env):
         self.attention_ratio = attention_ratio
         self.height, self.width = preprocess_shape
         self.num_channels = history_length if not use_attention else history_length * 2
+        self.num_bots = num_bots
 
         self.frame = None
         self.state = None
@@ -88,6 +100,13 @@ class DoomEnv(gym.Env):
         """
         Resets the environment and return initial state.
         """
+        if self.num_bots > 0:
+            # Add specific number of bots
+            # (file examples/bots.cfg must be placed in the same directory as the Doom executable file,
+            # edit this file to adjust bots).
+            self.env.send_game_command('removebots')
+            for i in range(self.num_bots):
+                self.env.send_game_command('addbot')
         self.env.new_episode()
         init_state = self.env.get_state()
         self.frame = init_state.screen_buffer
