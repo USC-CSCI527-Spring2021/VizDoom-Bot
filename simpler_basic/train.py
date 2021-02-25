@@ -37,6 +37,7 @@ def train():
 
     try:
         agent = PPO2.load(SAVE_PATH, env=env)
+        agent.learning_rate = linear_schedule(LEARNING_RATE_BEG, LEARNING_RATE_END, verbose=True)
         print("Model loaded")
     except ValueError:
         print("Failed to load model, training from scratch...")
