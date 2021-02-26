@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 import math
 
-from typing import Tuple
+from typing import Tuple, Dict, List, Any, Callable
 
 # Small epsilon value for stabilizing division operations
 _eps = np.finfo(np.float32).eps.item()
@@ -84,3 +84,33 @@ def linear_schedule(initial_value: float, end_value: float, verbose: bool = Fals
         return lr
 
     return func
+
+
+def collect_kv(*from_dicts: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+    k2dict_idx = {}
+    for i, d in enumerate(from_dicts):
+        for k in d.keys():
+            if k in k2dict_idx:
+                raise ValueError(f'ambiguous key {k} encountered')
+            else:
+                k2dict_idx[k] = i
+
+    rst = {}
+    for k in keys:
+        if k not in k2dict_idx:
+            raise ValueError(f'unknown key {k} given is keys')
+        else:
+            rst[k] = from_dicts[k2dict_idx[k]][k]
+
+    return rst
+
+
+def make_expand_action_f(num_atomic_actions: int) -> Callable:
+    def _expand_action(*args) -> List[bool]:
+        a = [False] * num_atomic_actions
+        for action_id in args:
+            if action_id < num_atomic_actions:
+                a[action_id] = True
+        return a
+
+    return _expand_action
