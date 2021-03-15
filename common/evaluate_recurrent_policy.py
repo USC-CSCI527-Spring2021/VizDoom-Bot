@@ -15,6 +15,7 @@ import numpy as np
 from typing import Callable, List, Optional, Tuple, Union, Dict, Any
 from stable_baselines.common.vec_env import VecEnv, sync_envs_normalization, DummyVecEnv
 from stable_baselines.common.callbacks import BaseCallback, EventCallback
+from stable_baselines.common.vec_env.vec_normalize import VecNormalize
 from stable_baselines import logger
 
 if typing.TYPE_CHECKING:
@@ -165,7 +166,8 @@ class RecurrentEvalCallback(EventCallback):
 
         if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
             # Sync training and eval env if there is VecNormalize
-            sync_envs_normalization(self.training_env, self.eval_env)
+            if isinstance(self.training_env, VecNormalize):
+                sync_envs_normalization(self.training_env, self.eval_env)
 
             episode_rewards, episode_lengths = evaluate_recurrent_policy(
                 self.model, self.eval_env,

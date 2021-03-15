@@ -30,8 +30,8 @@ PARAMS_DICT = {
     'use_attention': True,
     'attention_ratio': 0.5,
     'reward_shaper': RewardShaper,  # set to None to disable reward shaping
-    'learning_rate_beg': 0.00001,
-    'learning_rate_end': 0.00001,
+    'learning_rate_beg': 0.0001,
+    'learning_rate_end': 0.0001,
     'discount_factor': 0.99,  # gamma
     'max_steps_per_episode': 256,
     'grad_clip_norm': 0.5,

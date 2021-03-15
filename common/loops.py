@@ -17,10 +17,15 @@ from common.game_wrapper import DoomEnv
 from common.utils import linear_schedule, collect_kv
 from common.evaluate_recurrent_policy import RecurrentEvalCallback
 from common.i_reward_shaper import IRewardShaper
+from common.vec_curiosity_wrapper import CuriosityWrapper
 from typing import Dict, Tuple, Any, Type
 
 
-def train_ppo(constants: Dict[str, Any], params: Dict[str, Any], policy: Type[BasePolicy] = CnnPolicy):
+def train_ppo(
+        constants: Dict[str, Any],
+        params: Dict[str, Any],
+        policy: Type[BasePolicy] = CnnPolicy,
+):
     is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
 
     env_kwargs_keys = [
@@ -36,6 +41,24 @@ def train_ppo(constants: Dict[str, Any], params: Dict[str, Any], policy: Type[Ba
         DoomEnv, n_envs=params['num_envs'], env_kwargs=env_kwargs,
         vec_env_cls=SubprocVecEnv if params['use_multi_threads'] else DummyVecEnv,
     )
+
+    if 'use_curiosity' in params and params['use_curiosity']:
+        try:
+            env = CuriosityWrapper.load(params['curiosity_load_path'], env)
+            print("Curiosity model loaded")
+        except ValueError:
+            print("Failed to load curiosity model, creating new...")
+            env = CuriosityWrapper(
+                env=env,
+                intrinsic_reward_weight=params['intrinsic_reward_weight'],
+                norm_ext_reward=params['normalize_extrinsic_reward'],
+                buffer_size=params['curiosity_buffer_size'],
+                train_freq=params['curiosity_train_freq'],
+                opt_steps=params['curiosity_opt_steps'],
+                batch_size=params['curiosity_batch_size'],
+                gamma=params['curiosity_gamma'],
+                learning_rate=params['curiosity_learning_rate'],
+            )
 
     lr_schedule = linear_schedule(
         params['learning_rate_beg'], params['learning_rate_end'], verbose=True)
@@ -92,7 +115,11 @@ def train_ppo(constants: Dict[str, Any], params: Dict[str, Any], policy: Type[Ba
     try:
         agent.learn(total_timesteps=params['total_timesteps'], callback=callbacks)
     finally:
+        # save trained agent
         agent.save(save_path=params['save_path'])
+        # save curiosity model
+        if 'use_curiosity' in params and params['use_curiosity'] and params['curiosity_save_path'] is not None:
+            env.save(params['curiosity_save_path'])
 
 
 def evaluate_ppo(

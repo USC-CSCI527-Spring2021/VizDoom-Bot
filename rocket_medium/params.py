@@ -20,7 +20,7 @@ PARAMS_DICT = {
     'use_multi_threads': True,  # set to False to disable multi threading of envs
     'visible_training': True,
     # in-training eval related params
-    'eval_freq': 10_000,
+    'eval_freq': 5_000,
     'num_eval_episodes': 5,
     'deterministic_eval': False,
     # common params
@@ -30,8 +30,8 @@ PARAMS_DICT = {
     'use_attention': True,
     'attention_ratio': 0.5,
     'reward_shaper': RewardShaper,  # set to None to disable reward shaping
-    'learning_rate_beg': 0.00001,
-    'learning_rate_end': 0.00001,
+    'learning_rate_beg': 0.0001,
+    'learning_rate_end': 0.0001,
     'discount_factor': 0.99,  # gamma
     'max_steps_per_episode': 256,
     'grad_clip_norm': 0.5,
@@ -41,4 +41,16 @@ PARAMS_DICT = {
     'vf_coef': 0.5,
     # ppo related params
     'ppo_cliprange': 0.2,
+    # curiosity related params
+    'use_curiosity': True,
+    'intrinsic_reward_weight': 1.0,
+    'normalize_extrinsic_reward': True,
+    'curiosity_save_path': 'curiosity_saved_model',
+    'curiosity_load_path': 'curiosity_saved_model',
+    'curiosity_buffer_size': 2048,
+    'curiosity_train_freq': 10000,
+    'curiosity_opt_steps': 10,
+    'curiosity_batch_size': 128,
+    'curiosity_gamma': 0.99,
+    'curiosity_learning_rate': 0.0001,
 }

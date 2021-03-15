@@ -5,7 +5,7 @@
 # @Date  : 2/6/21 3:00 AM
 # @Desc  : Parameters for training & evaluating
 
-from reward_shaper import RewardShaper
+# from reward_shaper import RewardShaper
 
 PARAMS_DICT = {
     # save / load / ckpt
@@ -20,7 +20,7 @@ PARAMS_DICT = {
     'use_multi_threads': True,  # set to False to disable multi threading of envs
     'visible_training': True,
     # in-training eval related params
-    'eval_freq': 10_000,
+    'eval_freq': 5_000,
     'num_eval_episodes': 5,
     'deterministic_eval': False,
     # common params
@@ -29,9 +29,9 @@ PARAMS_DICT = {
     'history_length': 4,
     'use_attention': True,
     'attention_ratio': 0.5,
-    'reward_shaper': RewardShaper,  # set to None to disable reward shaping
-    'learning_rate_beg': 0.00001,
-    'learning_rate_end': 0.00001,
+    'reward_shaper': None,  # set to None to disable reward shaping
+    'learning_rate_beg': 0.0001,
+    'learning_rate_end': 0.0001,
     'discount_factor': 0.99,  # gamma
     'max_steps_per_episode': 256,
     'grad_clip_norm': 0.5,
