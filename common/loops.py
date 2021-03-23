@@ -6,7 +6,10 @@
 # @Desc  : Common training and evaluating loops
 
 import tqdm
+import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import vizdoom as vzd
 
 from stable_baselines.common import make_vec_env
 from stable_baselines.common.policies import CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy, BasePolicy
@@ -14,11 +17,11 @@ from stable_baselines.common.callbacks import CheckpointCallback, EvalCallback, 
 from stable_baselines import PPO2
 from stable_baselines.common.vec_env import SubprocVecEnv, DummyVecEnv
 from common.game_wrapper import DoomEnv
-from common.utils import linear_schedule, collect_kv
+from common.utils import linear_schedule, collect_kv, get_img_from_fig
 from common.evaluate_recurrent_policy import RecurrentEvalCallback
 from common.i_reward_shaper import IRewardShaper
 from common.vec_curiosity_wrapper import CuriosityWrapper
-from typing import Dict, Tuple, Any, Type
+from typing import Dict, Tuple, Any, Type, List, Union, Optional
 
 
 def train_ppo(
@@ -125,6 +128,7 @@ def train_ppo(
 def evaluate_ppo(
         constants: Dict[str, Any], params: Dict[str, Any], policy: Type[BasePolicy] = CnnPolicy,
         episodes_to_eval: int = 10, deterministic: bool = False,
+        overwrite_frames_to_skip: Optional[int] = None
 ):
     is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
 
@@ -136,6 +140,8 @@ def evaluate_ppo(
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
+    if overwrite_frames_to_skip is not None:
+        eval_env_kwargs['frames_to_skip'] = overwrite_frames_to_skip
     eval_env = DoomEnv(**eval_env_kwargs)
 
     try:
@@ -187,3 +193,106 @@ def evaluate_ppo(
 
     rewards = np.array(rewards, dtype=np.float32)
     print(f'avg: {rewards.mean()}, std: {rewards.std()}, min: {rewards.min()}, max: {rewards.max()}')
+
+
+def record_evaluate_ppo(
+        constants: Dict[str, Any], params: Dict[str, Any],
+        action_names: List[str],
+        filename: str = './evaluation.mp4',
+        policy: Type[BasePolicy] = CnnPolicy,
+        episodes_to_eval: int = 1, deterministic: bool = False,
+        overwrite_frames_to_skip: Optional[int] = None,
+):
+    assert len(action_names) == constants['num_actions'], 'length of action_names and num_actions mismatch'
+
+    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
+
+    eval_env_kwargs_keys = [
+        'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
+        'frames_to_skip', 'history_length', 'use_attention',
+        'attention_ratio', 'reward_shaper', 'num_bots'
+    ]
+    eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
+    eval_env_kwargs['visible'] = True
+    eval_env_kwargs['is_sync'] = False
+    eval_env_kwargs['screen_format'] = vzd.ScreenFormat.CRCGCB
+    if overwrite_frames_to_skip is not None:
+        eval_env_kwargs['frames_to_skip'] = overwrite_frames_to_skip
+    eval_env = DoomEnv(**eval_env_kwargs)
+
+    try:
+        agent = PPO2.load(params['save_path'])
+        print("Model loaded")
+    except ValueError:
+        print("Failed to load model, evaluate untrained model...")
+        agent = PPO2(policy, eval_env, verbose=True)
+
+    # bootstrap the network
+    if params['use_attention']:
+        random_obs = np.random.normal(
+            size=(constants['resized_height'], constants['resized_width'], params['history_length'] * 2)
+        )
+    else:
+        random_obs = np.random.normal(
+            size=(constants['resized_height'], constants['resized_width'], params['history_length'])
+        )
+    if is_recurrent_policy:
+        random_zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
+        random_zero_completed_obs[0, :] = random_obs
+        random_obs = random_zero_completed_obs
+    agent.predict(random_obs)
+
+    frames = []
+    rewards = []
+    action_probs = []
+    with tqdm.trange(episodes_to_eval) as t:
+        for i in t:
+            episode_r = 0.0
+            obs = eval_env.reset()
+            if is_recurrent_policy:
+                state = None
+                zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
+                zero_completed_obs[0, :] = obs
+            done = False
+            while not done:
+                if is_recurrent_policy:
+                    action, state = agent.predict(zero_completed_obs, state, deterministic=deterministic)
+                    action_prob = agent.action_probability(zero_completed_obs, state)
+                    action_prob = action_prob[0]
+                    new_obs, step_r, done, info = eval_env.step(action[0], smooth_rendering=True)
+                    zero_completed_obs[0, :] = new_obs
+                else:
+                    action, _ = agent.predict(obs, deterministic=deterministic)
+                    action_prob = agent.action_probability(obs)
+                    obs, step_r, done, info = eval_env.step(action, smooth_rendering=True)
+                frames.extend(info['frames'])
+                action_probs.extend([action_prob] * len(info['frames']))
+                episode_r += step_r
+            rewards.append(episode_r)
+            t.set_description(f'Episode {i}')
+            t.set_postfix(
+                episode_reward=episode_r)
+    rewards = np.array(rewards, dtype=np.float32)
+    print(f'avg: {rewards.mean()}, std: {rewards.std()}, min: {rewards.min()}, max: {rewards.max()}')
+    eval_env.close()
+
+    def _render_step(f: np.ndarray, p: np.ndarray) -> np.ndarray:
+        fig, ax = plt.subplots(1, 2, gridspec_kw={'width_ratios': [2, 1]})
+        fig.tight_layout(pad=0.2)
+        ax[0].imshow(f.transpose(1, 2, 0))  # (ch, h, w) -> (h, w, ch)
+        ax[1].bar(action_names, p)
+        ax[1].set_ylim(0.0, 1.0)  # use fixed y axis to stabilize animation
+        rst_frame = get_img_from_fig(fig, 180, rgb=False)
+        plt.close(fig)
+        return rst_frame
+
+    # generate prob histograms along with frames and write out frames to video file
+    test_frame = _render_step(frames[0], action_probs[0])
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    h = test_frame.shape[0]
+    w = test_frame.shape[1]
+    out = cv2.VideoWriter(filename, fourcc, 30, (w, h))
+    print("Rendering video...")
+    for f, p in tqdm.tqdm(zip(frames, action_probs), total=len(frames)):
+        out.write(_render_step(f, p))
+    out.release()

@@ -4,6 +4,8 @@ __pycache__/
 */_vizdoom/
 */tf_board/
 */*_ckpt/
+*/*_backup/
+*/record_videos/
 */logs/
 *saved_model*
 *.mp4
