@@ -36,7 +36,7 @@ ACTION_LIST = [
 ]
 
 CONSTANTS_DICT = {
-    'scenario_cfg_path': '../scenarios/my_way_home.cfg',
+    'scenario_cfg_path': '../scenarios/simpler_my_way_home.cfg',
     'game_args': '+viz_nocheat 0',
     'num_bots': 0,
     'action_list': ACTION_LIST,
