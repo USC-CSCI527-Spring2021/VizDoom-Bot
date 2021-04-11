@@ -96,14 +96,14 @@ class RewardShaper(IRewardShaper):
 
             d_ammo5 = new_game_vars[1] - self.ammo5
             # reward for ammo-pickups
-            r += 0.15 if d_ammo5 > 0 else 0.0
+            r += 0.2 if d_ammo5 > 0 else 0.0
             # penalty for ammo decrement
-            r += 0.02 * d_ammo5 if d_ammo5 < 0 else 0.0
+            r += 0.05 * d_ammo5 if d_ammo5 < 0 else 0.0
             # extra reward for picking up ammo in need
-            r += 0.3 if d_ammo5 > 0 and self.ammo5 <= 3 else 0.0
+            r += 0.5 if d_ammo5 > 0 and self.ammo5 <= 3 else 0.0
 
             # reward for hits
-            r += 1.0 if new_game_vars[2] > self.hit_count else 0.0
+            r += 2.0 if new_game_vars[2] > self.hit_count else 0.0
             # reward for kills
             r += 5.0 if new_game_vars[3] > self.kill_count else 0.0
             # penalty for hits taken
