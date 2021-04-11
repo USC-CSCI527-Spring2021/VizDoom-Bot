@@ -88,11 +88,11 @@ class RewardShaper(IRewardShaper):
         if not is_dead:
             d_health = new_game_vars[0] - self.health
             # reward for health-pickups
-            r += 0.05 * d_health if d_health > 0 else 0.0
+            r += 0.005 * d_health if d_health > 0 else 0.0
             # penalty for health loss
             r += 0.05 * d_health if d_health < 0 else 0.0
             # extra reward for picking up health in need
-            r += 0.2 * d_health if d_health > 0 and self.health <= 10.0 else 0.0
+            r += 0.01 * d_health if d_health > 0 and self.health <= 10.0 else 0.0
 
             d_ammo5 = new_game_vars[1] - self.ammo5
             # reward for ammo-pickups
@@ -103,17 +103,17 @@ class RewardShaper(IRewardShaper):
             r += 0.3 if d_ammo5 > 0 and self.ammo5 <= 3 else 0.0
 
             # reward for hits
-            r += 0.5 if new_game_vars[2] > self.hit_count else 0.0
+            r += 1.0 if new_game_vars[2] > self.hit_count else 0.0
             # reward for kills
-            r += 2.0 if new_game_vars[3] > self.kill_count else 0.0
+            r += 5.0 if new_game_vars[3] > self.kill_count else 0.0
             # penalty for hits taken
             r += -0.1 if new_game_vars[4] > self.hits_taken else 0.0
             # reward for armor-pickups
-            r += 0.2 if new_game_vars[6] > self.armor else 0.0
+            r += 0.5 if new_game_vars[6] > self.armor else 0.0
 
             dist = self.calc_dist(new_game_vars[7], new_game_vars[8], new_game_vars[9])
             # reward for moving around
-            r += 1e-3 * dist
+            r += 1e-4 * dist
             # penalty for staying
             r += -0.001 if dist < 8.0 else 0.0
 

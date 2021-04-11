@@ -33,7 +33,7 @@ PARAMS_DICT = {
     'learning_rate_beg': 0.0001,
     'learning_rate_end': 0.0001,
     'discount_factor': 0.99,  # gamma
-    'max_steps_per_episode': 700,
+    'max_steps_per_episode': 450,
     'grad_clip_norm': 0.5,
     'opt_epochs_per_batch': 4,
     # actor-critic loss related params
