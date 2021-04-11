@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File  : record_evaluate_ppo_lstm.py.py
+# @File  : train_ppo_lstm.py
 # @Author: harry
-# @Date  : 3/15/21 5:29 PM
-# @Desc  : Evaluate and record a video
+# @Date  : 2/18/21 7:30 PM
+# @Desc  : Train the agent (PPO with a CNN-LSTM policy network)
 
 import sys
 import os
@@ -18,12 +18,4 @@ from constants import *
 from params import *
 
 if __name__ == '__main__':
-    record_evaluate_ppo(
-        CONSTANTS_DICT, PARAMS_DICT,
-        action_names=['N', 'L', 'R', 'F'],
-        filename='./evaluation.mp4',
-        policy=CnnLstmPolicy,
-        episodes_to_eval=1,
-        deterministic=False,
-        overwrite_frames_to_skip=None,
-    )
+    train_ppo(CONSTANTS_DICT, PARAMS_DICT, policy=CnnLstmPolicy)
