@@ -28,7 +28,7 @@ def small_convnet(x, activ=tf.nn.relu, **kwargs):
     return tf_layers.linear(layer_3, 'fc1', n_hidden=512, init_scale=np.sqrt(2))
 
 
-class CuriosityWrapper(BaseTFWrapper):
+class RdnWrapper(BaseTFWrapper):
     """
     Random Network Distillation (RND) curiosity reward.
     https://arxiv.org/abs/1810.12894
@@ -194,11 +194,11 @@ class CuriosityWrapper(BaseTFWrapper):
         for _ in range(self.gradient_steps):
             obs_batch, act_batch, rews_batch, next_obs_batch, done_mask = self.buffer.sample(self.batch_size)
             obs_batch = self.normalize_obs(obs_batch)
-            test = self.sess.run(self.aux_loss, {self.observation_ph: obs_batch})
+            # test = self.sess.run(self.aux_loss, {self.observation_ph: obs_batch})
             train, loss = self.sess.run([self.training_op, self.aux_loss], {self.observation_ph: obs_batch})
             total_loss += loss
         # logging.info("Trained predictor. Avg loss: {}".format(total_loss / self.gradient_steps))
-        print("[CuriosityWrapper] Trained predictor. Avg loss: {}".format(total_loss / self.gradient_steps))
+        print("[RdnWrapper] Trained predictor. Avg loss: {}".format(total_loss / self.gradient_steps))
 
     def _update_int_reward_rms(self, reward: np.ndarray) -> None:
         """Update reward normalization statistics."""

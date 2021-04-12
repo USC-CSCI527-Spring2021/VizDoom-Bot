@@ -20,7 +20,8 @@ from common.game_wrapper import DoomEnv
 from common.utils import linear_schedule, collect_kv, get_img_from_fig
 from common.evaluate_recurrent_policy import RecurrentEvalCallback
 from common.i_reward_shaper import IRewardShaper
-from common.vec_curiosity_wrapper import CuriosityWrapper
+from common.vec_curiosity_wrapper_rdn import RdnWrapper
+from common.vec_curiosity_wrapper_icm import IcmWrapper
 from typing import Dict, Tuple, Any, Type, List, Union, Optional
 
 
@@ -46,22 +47,48 @@ def train_ppo(
     )
 
     if 'use_curiosity' in params and params['use_curiosity']:
-        try:
-            env = CuriosityWrapper.load(params['curiosity_load_path'], env)
-            print("Curiosity model loaded")
-        except ValueError:
-            print("Failed to load curiosity model, creating new...")
-            env = CuriosityWrapper(
-                env=env,
-                intrinsic_reward_weight=params['intrinsic_reward_weight'],
-                norm_ext_reward=params['normalize_extrinsic_reward'],
-                buffer_size=params['curiosity_buffer_size'],
-                train_freq=params['curiosity_train_freq'],
-                opt_steps=params['curiosity_opt_steps'],
-                batch_size=params['curiosity_batch_size'],
-                gamma=params['curiosity_gamma'],
-                learning_rate=params['curiosity_learning_rate'],
-            )
+        # default to RDN curiosity wrapper
+        if 'curiosity_type' not in params:
+            params['curiosity_type'] = 'RDN'
+
+        if params['curiosity_type'] == 'RDN':
+            try:
+                env = RdnWrapper.load(params['curiosity_load_path'], env)
+                print("RDN Curiosity model loaded")
+            except ValueError:
+                print("Failed to load RDN curiosity model, creating new...")
+                env = RdnWrapper(
+                    env=env,
+                    intrinsic_reward_weight=params['intrinsic_reward_weight'],
+                    norm_ext_reward=params['normalize_extrinsic_reward'],
+                    buffer_size=params['curiosity_buffer_size'],
+                    train_freq=params['curiosity_train_freq'],
+                    opt_steps=params['curiosity_opt_steps'],
+                    batch_size=params['curiosity_batch_size'],
+                    gamma=params['curiosity_gamma'],
+                    learning_rate=params['curiosity_learning_rate'],
+                )
+        elif params['curiosity_type'] == 'ICM':
+            try:
+                env = IcmWrapper.load(params['curiosity_load_path'], env, num_actions=constants['num_actions'])
+                print("ICM Curiosity model loaded")
+            except ValueError:
+                print("Failed to load ICM curiosity model, creating new...")
+                env = IcmWrapper(
+                    env=env,
+                    intrinsic_reward_weight=params['intrinsic_reward_weight'],
+                    norm_ext_reward=params['normalize_extrinsic_reward'],
+                    buffer_size=params['curiosity_buffer_size'],
+                    train_freq=params['curiosity_train_freq'],
+                    opt_steps=params['curiosity_opt_steps'],
+                    batch_size=params['curiosity_batch_size'],
+                    gamma=params['curiosity_gamma'],
+                    learning_rate=params['curiosity_learning_rate'],
+                    beta=params['curiosity_icm_beta'],
+                    n_hidden=params['curiosity_icm_n_hidden'],
+                )
+        else:
+            raise ValueError(f'unknown curiosity type specified: {params["curiosity_type"]}')
 
     lr_schedule = linear_schedule(
         params['learning_rate_beg'], params['learning_rate_end'], verbose=True)
