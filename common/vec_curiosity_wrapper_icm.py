@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @File  : vec_curiosity_wrapper.py
-# @Author: harry
+# @Author: Nghi, Harry
 # @Date  : 3/15/21 3:22 AM
 # @Desc  : https://github.com/NeoExtended/stable-baselines/blob/master/stable_baselines/common/vec_env/vec_curiosity_reward.py
 
