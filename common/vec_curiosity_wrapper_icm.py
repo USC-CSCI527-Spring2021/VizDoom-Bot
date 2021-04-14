@@ -359,7 +359,9 @@ class IcmWrapper(BaseTFWrapper):
             'learning_rate': self.learning_rate,
             'int_rwd_rms': self.int_rwd_rms,
             'ext_rwd_rms': self.ext_rwd_rms,
-            'obs_rms': self.obs_rms
+            'obs_rms': self.obs_rms,
+            'beta': self.beta,
+            'n_hidden': self.n_hidden,
         }
 
         params_to_save = self.get_parameters()

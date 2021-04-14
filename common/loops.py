@@ -70,7 +70,7 @@ def train_ppo(
                 )
         elif params['curiosity_type'] == 'ICM':
             try:
-                env = IcmWrapper.load(params['curiosity_load_path'], env, num_actions=constants['num_actions'])
+                env = IcmWrapper.load(params['curiosity_load_path'], env)
                 print("ICM Curiosity model loaded")
             except ValueError:
                 print("Failed to load ICM curiosity model, creating new...")
