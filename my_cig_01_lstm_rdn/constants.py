@@ -49,7 +49,7 @@ ACTION_LIST = [
 ]
 
 CONSTANTS_DICT = {
-    'scenario_cfg_path': '../scenarios/my_cig_01.cfg',
+    'scenario_cfg_path': '../scenarios/my_cig_01_lv1.cfg',
     'game_args': '-host 1 -deathmatch +sv_forcerespawn 1 +sv_noautoaim 1 '
                  '+sv_respawnprotect 1 +sv_spawnfarthest 1 +sv_nocrouch 1 +viz_respawn_delay 0 +viz_nocheat 0',
     'num_bots': 8,

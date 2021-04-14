@@ -43,6 +43,7 @@ PARAMS_DICT = {
     'ppo_cliprange': 0.2,
     # curiosity related params
     'use_curiosity': True,
+    'curiosity_type': 'RDN',
     'intrinsic_reward_weight': 2.0,
     'normalize_extrinsic_reward': True,
     'curiosity_save_path': 'curiosity_saved_model',
