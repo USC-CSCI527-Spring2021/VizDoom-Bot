@@ -91,37 +91,36 @@ class RewardShaper(IRewardShaper):
         if not is_dead:
             d_health = new_game_vars[0] - self.health
             # reward for health-pickups
-            r += 0.005 * d_health if d_health > 0 else 0.0
+            r += 0.04 * d_health if d_health > 0 else 0.0
             # penalty for health loss
             r += 0.05 * d_health if d_health < 0 else 0.0
             # extra reward for picking up health in need
-            r += 0.01 * d_health if d_health > 0 and self.health <= 10.0 else 0.0
+            r += 0.08 * d_health if d_health > 0 and self.health <= 10.0 else 0.0
 
             d_ammo5 = new_game_vars[1] - self.ammo5
             # reward for ammo-pickups
-            r += 0.1 * d_ammo5 if d_ammo5 > 0 else 0.0
+            r += 0.15 * d_ammo5 if d_ammo5 > 0 else 0.0
             # penalty for ammo decrement
-            r += 0.4 * d_ammo5 if d_ammo5 < 0 else 0.0
+            r += 0.04 * d_ammo5 if d_ammo5 < 0 else 0.0
             # extra reward for picking up ammo in need
-            r += 0.5 * d_ammo5 if d_ammo5 > 0 and self.ammo5 <= 3 else 0.0
+            r += 0.30 * d_ammo5 if d_ammo5 > 0 and self.ammo5 <= 3 else 0.0
 
             # reward for hits
             r += 0.5 if new_game_vars[2] > self.hit_count else 0.0
             # reward for kills
-            # r += 5.0 if new_game_vars[3] > self.kill_count else 0.0
             r += 1.0 if new_game_vars[11] > self.frag_count else 0.0
             # penalty for hits taken
-            r += -0.1 if new_game_vars[4] > self.hits_taken else 0.0
-            # penalty for suicide
-            r += -1.0 if new_game_vars[11] < self.frag_count else 0.0
+            # r += -0.1 if new_game_vars[4] > self.hits_taken else 0.0
+            # extra penalty for suicide
+            r += -0.5 if new_game_vars[11] < self.frag_count else 0.0
             # reward for armor-pickups
-            r += 0.5 if new_game_vars[6] > self.armor else 0.0
+            r += 0.30 if new_game_vars[6] > self.armor else 0.0
 
             dist = self.calc_dist(new_game_vars[7], new_game_vars[8], new_game_vars[9])
             # reward for moving around
-            r += 1e-4 * dist
+            r += 9e-5 * dist
             # penalty for staying
-            r += -0.001 if dist < 8.0 else 0.0
+            r += -0.03 if dist < 15.0 else 0.0
 
             # d_angle = abs(new_game_vars[10] - self.angle)
             # if d_angle > 300:
@@ -150,7 +149,8 @@ def test_reward_shaper():
         attention_ratio=0.5,
         reward_shaper=RewardShaper,
         game_args=game_args,
-        num_bots=10
+        num_bots=15,
+        overwrite_episode_timeout=None,
     )
     rs = g.reward_shaper
 
@@ -160,7 +160,8 @@ def test_reward_shaper():
         print("Initial ammo5:", rs.ammo5)
         print("Initial frag count:", rs.frag_count)
         # print("Initial kill count:", rs.kill_count)
-        for _ in range(200):
+        t = False
+        while not t:
             s, r, t, info = g.step(np.random.randint(0, len(g.action_list)), smooth_rendering=True)
             print(s.shape, r, t, info['shaping_reward'])
             if t:

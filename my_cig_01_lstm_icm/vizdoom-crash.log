@@ -1,0 +1,254 @@
+*** Fatal Error ***
+Address not mapped to object (signal 11)
+Address: 0xe
+
+System: Linux Harry-Arch 5.11.13-arch1-1 #1 SMP PREEMPT Sat, 10 Apr 2021 20:47:14 +0000 x86_64 GNU/Linux
+
+
+Executing: gdb --quiet --batch --command=gdb-respfile-wZ6xZS
+[New LWP 15960]
+[New LWP 15963]
+[New LWP 15964]
+[New LWP 15965]
+[New LWP 15966]
+[New LWP 15967]
+0x00007f4fe155810f in wait4 () from /usr/lib/libc.so.6
+
+* Loaded Libraries
+From                To                  Syms Read   Shared Object Library
+0x00007f4fe2599020  0x00007f4fe2812872  Yes (*)     /usr/lib/libgtk-x11-2.0.so.0
+0x00007f4fe2497020  0x00007f4fe24f384d  Yes (*)     /usr/lib/libgdk-x11-2.0.so.0
+0x00007f4fe246f020  0x00007f4fe24752e3  Yes (*)     /usr/lib/libpangocairo-1.0.so.0
+0x00007f4fe244c020  0x00007f4fe2459e54  Yes (*)     /usr/lib/libatk-1.0.so.0
+0x00007f4fe2334020  0x00007f4fe2405efe  Yes (*)     /usr/lib/libcairo.so.2
+0x00007f4fe22e5020  0x00007f4fe230d6fe  Yes (*)     /usr/lib/libgdk_pixbuf-2.0.so.0
+0x00007f4fe2154020  0x00007f4fe2250b56  Yes (*)     /usr/lib/libgio-2.0.so.0
+0x00007f4fe210b020  0x00007f4fe211531a  Yes (*)     /usr/lib/libpangoft2-1.0.so.0
+0x00007f4fe20c1020  0x00007f4fe20e76f5  Yes (*)     /usr/lib/libpango-1.0.so.0
+0x00007f4fe2066020  0x00007f4fe20944fc  Yes (*)     /usr/lib/libgobject-2.0.so.0
+0x00007f4fe1f40040  0x00007f4fe1fcb6a2  Yes (*)     /usr/lib/libglib-2.0.so.0
+0x00007f4fe1e59040  0x00007f4fe1eec022  Yes (*)     /usr/lib/libharfbuzz.so.0
+0x00007f4fe1e06020  0x00007f4fe1e3136e  Yes (*)     /usr/lib/libfontconfig.so.1
+0x00007f4fe1d37020  0x00007f4fe1dbc393  Yes (*)     /usr/lib/libfreetype.so.6
+0x00007f4fe1bb6040  0x00007f4fe1cb79a2  Yes (*)     /usr/lib/libSDL2-2.0.so.0
+0x00007f4fe1b7ba50  0x00007f4fe1b89a1f  No          /usr/lib/libpthread.so.0
+0x00007f4fe1b6c790  0x00007f4fe1b6f8c0  Yes (*)     /usr/lib/librt.so.1
+0x00007f4fe1b52020  0x00007f4fe1b5f270  Yes (*)     /usr/lib/libz.so.1
+0x00007f4fe1acd020  0x00007f4fe1b0fb06  Yes (*)     /usr/lib/libjpeg.so.8
+0x00007f4fe1ab8020  0x00007f4fe1ac4452  Yes (*)     /usr/lib/libbz2.so.1.0
+0x00007f4fe1aa2020  0x00007f4fe1aad6b8  Yes (*)     /usr/lib/libboost_thread.so.1.75.0
+0x00007f4fe1a96020  0x00007f4fe1a960f1  Yes (*)     /usr/lib/libboost_system.so.1.75.0
+0x00007f4fe1a91020  0x00007f4fe1a910f1  Yes (*)     /usr/lib/libboost_date_time.so.1.75.0
+0x00007f4fe1a88020  0x00007f4fe1a8b183  Yes (*)     /usr/lib/libboost_chrono.so.1.75.0
+0x00007f4fe1a07020  0x00007f4fe1a5ce5f  Yes (*)     /usr/lib/libsndfile.so.1
+0x00007f4fe19a4020  0x00007f4fe19dec96  Yes (*)     /usr/lib/libmpg123.so.0
+0x00007f4fe1999210  0x00007f4fe199a179  Yes (*)     /usr/lib/libdl.so.2
+0x00007f4fe1850040  0x00007f4fe193ba32  Yes         /usr/lib/libstdc++.so.6
+0x00007f4fe16843b0  0x00007f4fe171e878  Yes (*)     /usr/lib/libm.so.6
+0x00007f4fe165e020  0x00007f4fe166eca5  Yes         /usr/lib/libgcc_s.so.1
+0x00007f4fe14b2650  0x00007f4fe15fc16d  Yes (*)     /usr/lib/libc.so.6
+0x00007f4fe1488020  0x00007f4fe1488fac  Yes (*)     /usr/lib/libgmodule-2.0.so.0
+0x00007f4fe1362020  0x00007f4fe13ebade  Yes (*)     /usr/lib/libX11.so.6
+0x00007f4fe133f020  0x00007f4fe1341446  Yes (*)     /usr/lib/libXfixes.so.3
+0x00007f4fe1332020  0x00007f4fe13383a3  Yes (*)     /usr/lib/libXrender.so.1
+0x00007f4fe132c020  0x00007f4fe132c9a3  Yes (*)     /usr/lib/libXinerama.so.1
+0x00007f4fe1319020  0x00007f4fe1323989  Yes (*)     /usr/lib/libXi.so.6
+0x00007f4fe130b020  0x00007f4fe1311696  Yes (*)     /usr/lib/libXrandr.so.2
+0x00007f4fe1300020  0x00007f4fe1304c3e  Yes (*)     /usr/lib/libXcursor.so.1
+0x00007f4fe12f9020  0x00007f4fe12f9a55  Yes (*)     /usr/lib/libXcomposite.so.1
+0x00007f4fe12f4020  0x00007f4fe12f49ab  Yes (*)     /usr/lib/libXdamage.so.1
+0x00007f4fe12e2020  0x00007f4fe12ec33e  Yes (*)     /usr/lib/libXext.so.6
+0x00007f4fe12ab020  0x00007f4fe12ce8da  Yes (*)     /usr/lib/libpng16.so.16
+0x00007f4fe1287020  0x00007f4fe1299b86  Yes (*)     /usr/lib/libxcb.so.1
+0x00007f4fe1271020  0x00007f4fe1275b7f  Yes (*)     /usr/lib/libxcb-render.so.0
+0x00007f4fe1267020  0x00007f4fe1267b44  Yes (*)     /usr/lib/libxcb-shm.so.0
+0x00007f4fe11c9020  0x00007f4fe124a934  Yes (*)     /usr/lib/libpixman-1.so.0
+0x00007f4fe1134140  0x00007f4fe118404a  Yes (*)     /usr/lib/libtiff.so.5
+0x00007f4fe10d6040  0x00007f4fe1111082  Yes (*)     /usr/lib/libmount.so.1
+0x00007f4fe10b4710  0x00007f4fe10c15fc  Yes (*)     /usr/lib/libresolv.so.2
+0x00007f4fe1093020  0x00007f4fe1097108  Yes (*)     /usr/lib/libfribidi.so.0
+0x00007f4fe1088020  0x00007f4fe108ba24  Yes (*)     /usr/lib/libthai.so.0
+0x00007f4fe107c040  0x00007f4fe10813c6  Yes (*)     /usr/lib/libffi.so.7
+0x00007f4fe1008020  0x00007f4fe1057b6d  Yes (*)     /usr/lib/libpcre.so.1
+0x00007f4fe0fe4020  0x00007f4fe0ffd462  Yes (*)     /usr/lib/libgraphite2.so.3
+0x00007f4fe0fb6020  0x00007f4fe0fd2082  Yes (*)     /usr/lib/libexpat.so.1
+0x00007f4fe29c7090  0x00007f4fe29ea206  Yes (*)     /lib64/ld-linux-x86-64.so.2
+0x00007f4fe0f1b020  0x00007f4fe0f1d677  Yes (*)     /usr/lib/libvorbisenc.so.2
+0x00007f4fe0ed1020  0x00007f4fe0ef979b  Yes (*)     /usr/lib/libFLAC.so.8
+0x00007f4fe0e6b020  0x00007f4fe0eafe19  Yes (*)     /usr/lib/libopus.so.0
+0x00007f4fe0e3e020  0x00007f4fe0e5351b  Yes (*)     /usr/lib/libvorbis.so.0
+0x00007f4fe0e31020  0x00007f4fe0e333de  Yes (*)     /usr/lib/libogg.so.0
+0x00007f4fe0e2b040  0x00007f4fe0e2bd52  Yes (*)     /usr/lib/libXau.so.6
+0x00007f4fe0e24020  0x00007f4fe0e25882  Yes (*)     /usr/lib/libXdmcp.so.6
+0x00007f4fe0d4b020  0x00007f4fe0e0a966  Yes (*)     /usr/lib/libzstd.so.1
+0x00007f4fe0d21020  0x00007f4fe0d37e73  Yes (*)     /usr/lib/liblzma.so.5
+0x00007f4fe0cd6040  0x00007f4fe0d07e42  Yes (*)     /usr/lib/libblkid.so.1
+0x00007f4fe0cc5020  0x00007f4fe0cc8931  Yes (*)     /usr/lib/libdatrie.so.1
+0x00007f4fdff0f020  0x00007f4fdff110d1  Yes (*)     /usr/lib/gtk-2.0/modules/libcanberra-gtk-module.so
+0x00007f4fdfed6020  0x00007f4fdfed76b7  Yes (*)     /usr/lib/libcanberra-gtk.so.0
+0x00007f4fdfec3020  0x00007f4fdfecc9ea  Yes (*)     /usr/lib/libcanberra.so.0
+0x00007f4fdfeb7020  0x00007f4fdfebb4ec  Yes (*)     /usr/lib/libvorbisfile.so.3
+0x00007f4fdfea0020  0x00007f4fdfeacfcf  Yes (*)     /usr/lib/libtdb.so.1
+0x00007f4fdfe92020  0x00007f4fdfe962f0  Yes (*)     /usr/lib/libltdl.so.7
+0x00007f4fdff02020  0x00007f4fdff07565  Yes (*)     /usr/lib/gtk-2.0/2.10.0/engines/libpixmap.so
+0x00007f4fdfefb020  0x00007f4fdfefb7ab  Yes (*)     /usr/lib/gtk-2.0/2.10.0/engines/libadwaita.so
+0x00007f4fdfe39040  0x00007f4fdfe517c0  Yes (*)     /usr/lib/libudev.so.1
+0x00007f4fdf4e9020  0x00007f4fdf56e309  Yes (*)     /usr/lib/libopenal.so
+0x00007f4fdf4bc020  0x00007f4fdf4c6877  Yes (*)     /usr/lib/libjack.so.0
+0x00007f4fdf321020  0x00007f4fdf4641b1  Yes (*)     /usr/lib/libdb-5.3.so
+0x00007f4fdeaae020  0x00007f4fdeadc3c0  Yes (*)     /usr/lib/libpulse.so.0
+0x00007f4fdea31040  0x00007f4fdea76312  Yes (*)     /usr/lib/pulseaudio/libpulsecommon-14.2.so
+0x00007f4fde9d5020  0x00007f4fdea03203  Yes (*)     /usr/lib/libdbus-1.so.3
+0x00007f4fde921040  0x00007f4fde999fb0  Yes (*)     /usr/lib/libsystemd.so.0
+0x00007f4fdfef4020  0x00007f4fdfef667a  Yes (*)     /usr/lib/libasyncns.so.0
+0x00007f4fde8ee020  0x00007f4fde908957  Yes (*)     /usr/lib/liblz4.so.1
+0x00007f4fdfeea020  0x00007f4fdfeed296  Yes (*)     /usr/lib/libcap.so.2
+0x00007f4fde7c8040  0x00007f4fde89ef68  Yes (*)     /usr/lib/libgcrypt.so.20
+0x00007f4fde797040  0x00007f4fde7ab8d2  Yes (*)     /usr/lib/libgpg-error.so.0
+0x00007f4fdfee0020  0x00007f4fdfee0cfd  Yes (*)     /usr/lib/libXss.so.1
+0x00007f4fde505020  0x00007f4fde50782b  Yes (*)     /usr/lib/libXxf86vm.so.1
+0x00007f4fde4c0020  0x00007f4fde4c2a1d  Yes (*)     /usr/lib/libGL.so.1
+0x00007f4fde38b020  0x00007f4fde38cf87  Yes (*)     /usr/lib/libGLdispatch.so.0
+0x00007f4fde31b020  0x00007f4fde334bb1  Yes (*)     /usr/lib/libGLX.so.0
+0x00007f4fde2b7040  0x00007f4fde2fb052  Yes (*)     /usr/lib/libGLX_mesa.so.0
+0x00007f4fde270020  0x00007f4fde27d731  Yes (*)     /usr/lib/libglapi.so.0
+0x00007f4fde254020  0x00007f4fde25d666  Yes (*)     /usr/lib/libdrm.so.2
+0x00007f4fde23d020  0x00007f4fde2456a6  Yes (*)     /usr/lib/libxcb-glx.so.0
+0x00007f4fde47a020  0x00007f4fde47a10b  Yes (*)     /usr/lib/libX11-xcb.so.1
+0x00007f4fde22c020  0x00007f4fde22d1a6  Yes (*)     /usr/lib/libxcb-dri2.so.0
+0x00007f4fde226020  0x00007f4fde226e34  Yes (*)     /usr/lib/libxcb-dri3.so.0
+0x00007f4fde220020  0x00007f4fde2208a6  Yes (*)     /usr/lib/libxcb-present.so.0
+0x00007f4fde218020  0x00007f4fde21a1b2  Yes (*)     /usr/lib/libxcb-sync.so.1
+0x00007f4fde211020  0x00007f4fde2112ec  Yes (*)     /usr/lib/libxshmfence.so.1
+0x00007f4fde209020  0x00007f4fde20b6cc  Yes (*)     /usr/lib/libxcb-xfixes.so.0
+0x00007f4fdd4d7040  0x00007f4fddde0182  Yes (*)     /usr/lib/dri/i965_dri.so
+0x00007f4fdd3d1020  0x00007f4fdd3e7d25  Yes (*)     /usr/lib/libdrm_intel.so.1
+0x00007f4fdd3c1020  0x00007f4fdd3c7975  Yes (*)     /usr/lib/libdrm_radeon.so.1
+0x00007f4fdd3b7020  0x00007f4fdd3bac37  Yes (*)     /usr/lib/libdrm_nouveau.so.2
+0x00007f4fdd3ac020  0x00007f4fdd3b0593  Yes (*)     /usr/lib/libpciaccess.so.0
+0x00007f4fdd398550  0x00007f4fdd39e17c  Yes (*)     /usr/lib/libnss_files.so.2
+(*): Shared library is missing debugging information.
+
+* Threads
+  Id   Target Id                  Frame 
+* 1    LWP 15959 "vizdoom"        0x00007f4fe155810f in wait4 () from /usr/lib/libc.so.6
+  2    LWP 15960 "SDLTimer"       0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () from /usr/lib/libpthread.so.0
+  3    LWP 15963 "vizdoom"        0x00007f4fe158037f in poll () from /usr/lib/libc.so.6
+  4    LWP 15964 "vizdoom:disk$0" 0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () from /usr/lib/libpthread.so.0
+  5    LWP 15965 "vizdoom:disk$1" 0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () from /usr/lib/libpthread.so.0
+  6    LWP 15966 "vizdoom:disk$2" 0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () from /usr/lib/libpthread.so.0
+  7    LWP 15967 "vizdoom:disk$3" 0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () from /usr/lib/libpthread.so.0
+
+* FPU Status
+  R7: Empty   0x00000000000000000000
+  R6: Empty   0x00000000000000000000
+  R5: Empty   0x00000000000000000000
+  R4: Empty   0x00000000000000000000
+  R3: Empty   0x00000000000000000000
+  R2: Empty   0x00000000000000000000
+  R1: Empty   0x00000000000000000000
+=>R0: Empty   0x00000000000000000000
+
+Status Word:         0x0000                                            
+                       TOP: 0
+Control Word:        0x037f   IM DM ZM OM UM PM
+                       PC: Extended Precision (64-bits)
+                       RC: Round to nearest
+Tag Word:            0xffff
+Instruction Pointer: 0x00:0x00000000
+Operand Pointer:     0x00:0x00000000
+Opcode:              0x0000
+
+* Registers
+rax            0xfffffffffffffe00  -512
+rbx            0x3e60              15968
+rcx            0x7f4fe155810f      139981059621135
+rdx            0x0                 0
+rsi            0x559c05b70bec      94128599141356
+rdi            0x3e60              15968
+rbp            0xb                 0xb
+rsp            0x559c05b70bb0      0x559c05b70bb0
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x293               659
+r12            0x559c05b70bec      94128599141356
+r13            0x559c05b6e0e0      94128599130336
+r14            0x13                19
+r15            0x1090              4240
+rip            0x7f4fe155810f      0x7f4fe155810f <wait4+95>
+eflags         0x293               [ CF AF SF IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+
+* Backtrace
+
+Thread 7 (LWP 15967 "vizdoom:disk$3"):
+#0  0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () at /usr/lib/libpthread.so.0
+#1  0x00007f4fe1b83260 in pthread_cond_wait@@GLIBC_2.3.2 () at /usr/lib/libpthread.so.0
+#2  0x00007f4fdd5b536c in  () at /usr/lib/dri/i965_dri.so
+#3  0x00007f4fdd5b4a88 in  () at /usr/lib/dri/i965_dri.so
+#4  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#5  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 6 (LWP 15966 "vizdoom:disk$2"):
+#0  0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () at /usr/lib/libpthread.so.0
+#1  0x00007f4fe1b83260 in pthread_cond_wait@@GLIBC_2.3.2 () at /usr/lib/libpthread.so.0
+#2  0x00007f4fdd5b536c in  () at /usr/lib/dri/i965_dri.so
+#3  0x00007f4fdd5b4a88 in  () at /usr/lib/dri/i965_dri.so
+#4  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#5  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 5 (LWP 15965 "vizdoom:disk$1"):
+#0  0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () at /usr/lib/libpthread.so.0
+#1  0x00007f4fe1b83260 in pthread_cond_wait@@GLIBC_2.3.2 () at /usr/lib/libpthread.so.0
+#2  0x00007f4fdd5b536c in  () at /usr/lib/dri/i965_dri.so
+#3  0x00007f4fdd5b4a88 in  () at /usr/lib/dri/i965_dri.so
+#4  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#5  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 4 (LWP 15964 "vizdoom:disk$0"):
+#0  0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () at /usr/lib/libpthread.so.0
+#1  0x00007f4fe1b83260 in pthread_cond_wait@@GLIBC_2.3.2 () at /usr/lib/libpthread.so.0
+#2  0x00007f4fdd5b536c in  () at /usr/lib/dri/i965_dri.so
+#3  0x00007f4fdd5b4a88 in  () at /usr/lib/dri/i965_dri.so
+#4  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#5  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 3 (LWP 15963 "vizdoom"):
+#0  0x00007f4fe158037f in poll () at /usr/lib/libc.so.6
+#1  0x00007f4fdf558407 in  () at /usr/lib/libopenal.so
+#2  0x00007f4fdeabd9a9 in pa_mainloop_poll () at /usr/lib/libpulse.so.0
+#3  0x00007f4fdeac8281 in pa_mainloop_iterate () at /usr/lib/libpulse.so.0
+#4  0x00007f4fdeac8331 in pa_mainloop_run () at /usr/lib/libpulse.so.0
+#5  0x00007f4fdf55996e in  () at /usr/lib/libopenal.so
+#6  0x00007f4fe1889bc4 in std::execute_native_thread_routine(void*) (__p=0x559c07df3c30) at /build/gcc/src/gcc/libstdc++-v3/src/c++11/thread.cc:80
+#7  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#8  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 2 (LWP 15960 "SDLTimer"):
+#0  0x00007f4fe1b899ba in __futex_abstimed_wait_common64 () at /usr/lib/libpthread.so.0
+#1  0x00007f4fe1b85b98 in __new_sem_wait_slow64.constprop.0 () at /usr/lib/libpthread.so.0
+#2  0x00007f4fe1cb56c4 in  () at /usr/lib/libSDL2-2.0.so.0
+#3  0x00007f4fe1c15f68 in  () at /usr/lib/libSDL2-2.0.so.0
+#4  0x00007f4fe1c158d1 in  () at /usr/lib/libSDL2-2.0.so.0
+#5  0x00007f4fe1cb4caa in  () at /usr/lib/libSDL2-2.0.so.0
+#6  0x00007f4fe1b7d299 in start_thread () at /usr/lib/libpthread.so.0
+#7  0x00007f4fe158b053 in clone () at /usr/lib/libc.so.6
+
+Thread 1 (LWP 15959 "vizdoom"):
+#0  0x00007f4fe155810f in wait4 () at /usr/lib/libc.so.6
+#1  0x0000559c0569e0dc in  ()
+#2  0x00007f4fe1b87960 in <signal handler called> () at /usr/lib/libpthread.so.0
+#3  0x0000559c056fda10 in G_CheckSpot(int, FPlayerStart*) ()
+#4  0x0000559c056fde67 in G_DeathMatchSpawnPlayer(int) ()
+#5  0x0000559c05700bd1 in G_Ticker() ()
+#6  0x0000559c056dd0b4 in TryRunTics() ()
+#7  0x0000559c056d43ac in D_DoomLoop() ()
+#8  0x0000559c056d68df in D_DoomMain() ()
+#9  0x0000559c056874e7 in main ()
+[Inferior 1 (process 15959) detached]
