@@ -11,7 +11,7 @@ import numpy as np
 
 from common.utils import process_frame
 from common.i_reward_shaper import IRewardShaper
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Optional, Union
 from gym import spaces
 
 
@@ -35,11 +35,16 @@ class DoomEnv(gym.Env):
             game_args: str = '',
             game_map: str = '',
             num_bots: int = 0,
+            overwrite_episode_timeout: Optional[int] = None,
+            extra_features: Optional[List[int]] = None,
+            extra_features_norm_factor: Optional[List[Union[int, float]]] = None,
     ):
         super(DoomEnv, self).__init__()
         # vizdoom game init
         game = vzd.DoomGame()
         game.load_config(scenario_cfg_path)
+        if overwrite_episode_timeout is not None:
+            game.set_episode_timeout(overwrite_episode_timeout)
         game.set_window_visible(visible)
         if is_spec:
             game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
@@ -72,29 +77,56 @@ class DoomEnv(gym.Env):
         self.attention_ratio = attention_ratio
         self.height, self.width = preprocess_shape
         self.num_channels = history_length if not use_attention else history_length * 2
+        # append extra features as last channel
+        self.use_extra_feature = False
+        self.extra_features = extra_features
+        self.extra_features_norm_factor = extra_features_norm_factor
+        if extra_features is not None and len(extra_features) > 0:
+            assert extra_features_norm_factor is not None and len(extra_features) == len(extra_features_norm_factor),\
+                'length of extra_features and extra_features_norm_factor mismatch'
+            assert len(extra_features) <= self.height * self.width, 'too many extra features'
+            self.num_channels += 1
+            self.use_extra_feature = True
         self.num_bots = num_bots
 
         self.frame = None
         self.state = None
         self.state_attention = None
+        self.state_extra_feature = None
 
         # Define action and observation space
         # They must be gym.spaces objects
-        # Example when using discrete actions:
         self.action_space = spaces.Discrete(len(action_list))
-        # Example for using image as input:
-        self.observation_space = spaces.Box(
-            low=0, high=255,
-            shape=(self.height, self.width, self.num_channels),
-            dtype=np.uint8,
-        )
+        if self.use_extra_feature:
+            self.observation_space = spaces.Box(
+                low=0.0, high=1.0,
+                shape=(self.height, self.width, self.num_channels),
+                dtype=np.float32,
+            )
+        else:
+            self.observation_space = spaces.Box(
+                low=0, high=255,
+                shape=(self.height, self.width, self.num_channels),
+                dtype=np.uint8,
+            )
 
     def get_state(self) -> np.ndarray:
         if self.use_attention:
             # stack normal state together with attention state
-            return np.concatenate((self.state, self.state_attention), axis=-1)
+            s = np.concatenate((self.state, self.state_attention), axis=-1)
         else:
-            return self.state.copy()
+            s = self.state.copy()
+        if self.use_extra_feature:
+            s = np.concatenate((s, self.state_extra_feature), axis=-1)
+        return s
+
+    def update_extra_feature(self):
+        # retrieve extra features from game variables
+        if self.use_extra_feature:
+            self.state_extra_feature = np.zeros(self.height * self.width, dtype=np.float32)
+            for i, (f, fn) in enumerate(zip(self.extra_features, self.extra_features_norm_factor)):
+                self.state_extra_feature[i] = float(self.env.get_game_variable(f)) / float(fn)
+            self.state_extra_feature = self.state_extra_feature.reshape((self.height, self.width, 1))
 
     def reset(self) -> np.ndarray:
         """
@@ -114,12 +146,19 @@ class DoomEnv(gym.Env):
             self.reward_shaper.reset(init_state.game_variables)
 
         # For the initial state, we stack the first frame history_length times
-        self.state = np.repeat(process_frame(self.frame, self.preprocess_shape), self.history_length, axis=-1)
+        self.state = np.repeat(
+            process_frame(self.frame, self.preprocess_shape, normalize=self.use_extra_feature),
+            self.history_length, axis=-1
+        )
         if self.use_attention:
             self.state_attention = np.repeat(
-                process_frame(self.frame, self.preprocess_shape, zoom_in=True, zoom_in_ratio=self.attention_ratio),
+                process_frame(self.frame, self.preprocess_shape,
+                              zoom_in=True, zoom_in_ratio=self.attention_ratio,
+                              normalize=self.use_extra_feature,
+                              ),
                 self.history_length, axis=-1
             )
+        self.update_extra_feature()
 
         return self.get_state()
 
@@ -168,14 +207,18 @@ class DoomEnv(gym.Env):
                 if self.reward_shaper is not None else 0.0
 
         self.frame = new_frame
-        processed_frame = process_frame(new_frame, self.preprocess_shape)
+        processed_frame = process_frame(new_frame, self.preprocess_shape, normalize=self.use_extra_feature)
         self.state = np.append(self.state[:, :, 1:], processed_frame, axis=-1)
         if self.use_attention:
             processed_frame_attention = process_frame(
-                new_frame, self.preprocess_shape, zoom_in=True, zoom_in_ratio=self.attention_ratio)
+                new_frame, self.preprocess_shape, zoom_in=True, zoom_in_ratio=self.attention_ratio,
+                normalize=self.use_extra_feature,
+            )
             self.state_attention = np.append(self.state_attention[:, :, 1:], processed_frame_attention, axis=-1)
+        self.update_extra_feature()
 
-        return self.get_state().astype(np.uint8), \
+        obs_dtype = np.float32 if self.use_extra_feature else np.uint8
+        return self.get_state().astype(obs_dtype), \
                reward + shaping_reward, \
                done, \
                {

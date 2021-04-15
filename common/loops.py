@@ -22,6 +22,7 @@ from common.evaluate_recurrent_policy import RecurrentEvalCallback
 from common.i_reward_shaper import IRewardShaper
 from common.vec_curiosity_wrapper_rdn import RdnWrapper
 from common.vec_curiosity_wrapper_icm import IcmWrapper
+from common.policies import AugmentedCnnLstmPolicy
 from typing import Dict, Tuple, Any, Type, List, Union, Optional
 
 
@@ -30,13 +31,23 @@ def train_ppo(
         params: Dict[str, Any],
         policy: Type[BasePolicy] = CnnPolicy,
 ):
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
+    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
+    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
 
     env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
         'frames_to_skip', 'history_length', 'visible_training', 'use_attention',
-        'attention_ratio', 'reward_shaper', 'num_bots'
+        'attention_ratio', 'reward_shaper', 'num_bots',
     ]
+    use_extra_feature = False
+    if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
+            and len(constants['extra_features']) > 0 \
+            and len(constants['extra_features_norm_factor']) > 0:
+        env_kwargs_keys.append('extra_features')
+        env_kwargs_keys.append('extra_features_norm_factor')
+        use_extra_feature = True
+    if use_extra_feature and not is_augmented_policy:
+        raise ValueError('use_extra_feature must be used together with an augmented policy')
     env_kwargs = collect_kv(constants, params, keys=env_kwargs_keys)
     env_kwargs['visible'] = env_kwargs['visible_training']
     del env_kwargs['visible_training']
@@ -67,6 +78,7 @@ def train_ppo(
                     batch_size=params['curiosity_batch_size'],
                     gamma=params['curiosity_gamma'],
                     learning_rate=params['curiosity_learning_rate'],
+                    drop_last_channel=use_extra_feature,
                 )
         elif params['curiosity_type'] == 'ICM':
             try:
@@ -86,14 +98,28 @@ def train_ppo(
                     learning_rate=params['curiosity_learning_rate'],
                     beta=params['curiosity_icm_beta'],
                     n_hidden=params['curiosity_icm_n_hidden'],
+                    drop_last_channel=use_extra_feature,
                 )
         else:
             raise ValueError(f'unknown curiosity type specified: {params["curiosity_type"]}')
 
     lr_schedule = linear_schedule(
         params['learning_rate_beg'], params['learning_rate_end'], verbose=True)
+    policy_kwargs = None
+    if use_extra_feature:
+        policy_kwargs = {
+            'n_extra_features': len(constants['extra_features']),
+        }
     try:
-        agent = PPO2.load(params['save_path'], env=env)
+        agent = PPO2.load(
+            params['save_path'], env=env,
+            gamma=params['discount_factor'],
+            n_steps=params['max_steps_per_episode'],
+            ent_coef=params['ent_coef'], vf_coef=params['vf_coef'],
+            max_grad_norm=params['grad_clip_norm'],
+            noptepochs=params['opt_epochs_per_batch'],
+            cliprange=params['ppo_cliprange'],
+        )
         agent.learning_rate = lr_schedule
         print("Model loaded")
     except ValueError:
@@ -109,6 +135,7 @@ def train_ppo(
             cliprange=params['ppo_cliprange'],
             cliprange_vf=-1,  # disable value clipping as per original PPO paper
             verbose=True,
+            policy_kwargs=policy_kwargs,
         )
 
     # save a checkpoint periodically
@@ -152,18 +179,41 @@ def train_ppo(
             env.save(params['curiosity_save_path'])
 
 
+def _get_random_obs(constants: Dict[str, Any], params: Dict[str, Any]) -> np.ndarray:
+    n_channel = params['history_length']
+    if params['use_attention']:
+        n_channel *= 2
+    if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
+            and len(constants['extra_features']) > 0 \
+            and len(constants['extra_features_norm_factor']) > 0:
+        n_channel += 1
+    return np.random.normal(
+        size=(constants['resized_height'], constants['resized_width'], n_channel)
+    )
+
+
 def evaluate_ppo(
         constants: Dict[str, Any], params: Dict[str, Any], policy: Type[BasePolicy] = CnnPolicy,
         episodes_to_eval: int = 10, deterministic: bool = False,
         overwrite_frames_to_skip: Optional[int] = None
 ):
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
+    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
+    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
 
     eval_env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
         'frames_to_skip', 'history_length', 'use_attention',
         'attention_ratio', 'reward_shaper', 'num_bots'
     ]
+    use_extra_feature = False
+    if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
+            and len(constants['extra_features']) > 0 \
+            and len(constants['extra_features_norm_factor']) > 0:
+        eval_env_kwargs_keys.append('extra_features')
+        eval_env_kwargs_keys.append('extra_features_norm_factor')
+        use_extra_feature = True
+    if use_extra_feature and not is_augmented_policy:
+        raise ValueError('use_extra_feature must be used together with an augmented policy')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
@@ -179,14 +229,7 @@ def evaluate_ppo(
         agent = PPO2(policy, eval_env, verbose=True)
 
     # bootstrap the network
-    if params['use_attention']:
-        random_obs = np.random.normal(
-            size=(constants['resized_height'], constants['resized_width'], params['history_length'] * 2)
-        )
-    else:
-        random_obs = np.random.normal(
-            size=(constants['resized_height'], constants['resized_width'], params['history_length'])
-        )
+    random_obs = _get_random_obs(constants, params)
     if is_recurrent_policy:
         random_zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
         random_zero_completed_obs[0, :] = random_obs
@@ -232,13 +275,23 @@ def record_evaluate_ppo(
 ):
     assert len(action_names) == constants['num_actions'], 'length of action_names and num_actions mismatch'
 
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy)
+    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
+    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
 
     eval_env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
         'frames_to_skip', 'history_length', 'use_attention',
         'attention_ratio', 'reward_shaper', 'num_bots'
     ]
+    use_extra_feature = False
+    if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
+            and len(constants['extra_features']) > 0 \
+            and len(constants['extra_features_norm_factor']) > 0:
+        eval_env_kwargs_keys.append('extra_features')
+        eval_env_kwargs_keys.append('extra_features_norm_factor')
+        use_extra_feature = True
+    if use_extra_feature and not is_augmented_policy:
+        raise ValueError('use_extra_feature must be used together with an augmented policy')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
@@ -255,14 +308,7 @@ def record_evaluate_ppo(
         agent = PPO2(policy, eval_env, verbose=True)
 
     # bootstrap the network
-    if params['use_attention']:
-        random_obs = np.random.normal(
-            size=(constants['resized_height'], constants['resized_width'], params['history_length'] * 2)
-        )
-    else:
-        random_obs = np.random.normal(
-            size=(constants['resized_height'], constants['resized_width'], params['history_length'])
-        )
+    random_obs = _get_random_obs(constants, params)
     if is_recurrent_policy:
         random_zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
         random_zero_completed_obs[0, :] = random_obs

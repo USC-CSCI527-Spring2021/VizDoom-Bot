@@ -17,12 +17,13 @@ from typing import Tuple, Dict, List, Any, Callable
 _eps = np.finfo(np.float32).eps.item()
 
 
-def process_frame(frame, shape=(120, 120), zoom_in=False, zoom_in_ratio=0.5):
+def process_frame(frame, shape=(120, 120), zoom_in=False, zoom_in_ratio=0.5, normalize=True):
     """Preprocesses a frame to shape[0] x shape[1] x 1 grayscale
     :param frame: The frame to process.  Must have values ranging from 0-255.
     :param shape: Desired shape to return.
     :param zoom_in: If true, perform zoom in on the frame and return the zoomed frame.
     :param zoom_in_ratio: Only applicable if zoom_in = True.
+    :param normalize: If true, divide pixel values with 255.0.
     """
     frame = frame.astype(np.uint8)  # cv2 requires np.uint8, other dtypes will not work
 
@@ -45,10 +46,10 @@ def process_frame(frame, shape=(120, 120), zoom_in=False, zoom_in_ratio=0.5):
     frame = cv2.resize(frame, shape, interpolation=cv2.INTER_NEAREST)
     frame = frame.reshape((*shape, 1))
 
-    # if normalize:
-    #     frame = frame.astype(np.float32) / 255.0
-
-    return frame.astype(np.uint8)
+    if normalize:
+        return frame.astype(np.float32) / 255.0
+    else:
+        return frame.astype(np.uint8)
 
 
 def get_img_from_fig(fig, dpi=180, rgb=True):
@@ -98,7 +99,7 @@ def collect_kv(*from_dicts: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
     rst = {}
     for k in keys:
         if k not in k2dict_idx:
-            raise ValueError(f'unknown key {k} given is keys')
+            raise ValueError(f'unknown key {k} given in keys')
         else:
             rst[k] = from_dicts[k2dict_idx[k]][k]
 

@@ -46,6 +46,7 @@ class RdnWrapper(BaseTFWrapper):
     :param norm_ext_reward: (bool) Weather or not to normalize extrinsic reward.
     :param gamma: (float) Reward discount factor for intrinsic reward normalization.
     :param learning_rate: (float) Learning rate for the Adam optimizer of the predictor network.
+    :param drop_last_channel: (bool) Drop last channel of the obs. Use together with extra-feature augmented policies.
     """
 
     def __init__(self, env, network: str = "cnn", intrinsic_reward_weight: float = 1.0,
@@ -53,6 +54,7 @@ class RdnWrapper(BaseTFWrapper):
                  batch_size: int = 128, learning_starts: int = 100, filter_end_of_episode: bool = True,
                  filter_reward: bool = False, norm_obs: bool = True,
                  norm_ext_reward: bool = True, gamma: float = 0.99, learning_rate: float = 0.0001,
+                 drop_last_channel: bool = False,
                  training: bool = True, _init_setup_model=True):
 
         super().__init__(env, _init_setup_model)
@@ -72,6 +74,7 @@ class RdnWrapper(BaseTFWrapper):
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.training = training
+        self.drop_last_channel = drop_last_channel
 
         self.epsilon = 1e-8
         self.int_rwd_rms = RunningMeanStd(shape=(), epsilon=self.epsilon)
@@ -108,6 +111,8 @@ class RdnWrapper(BaseTFWrapper):
             self.sess = tf_util.make_session(num_cpu=None, graph=self.graph)
             self.observation_ph, self.processed_obs = observation_input(self.venv.observation_space,
                                                                         scale=(self.network_type == "cnn"))
+            if self.drop_last_channel:
+                self.processed_obs = self.processed_obs[..., :-1]
 
             with tf.variable_scope("target_model"):
                 if self.network_type == 'cnn':
@@ -244,7 +249,8 @@ class RdnWrapper(BaseTFWrapper):
             'learning_rate': self.learning_rate,
             'int_rwd_rms': self.int_rwd_rms,
             'ext_rwd_rms': self.ext_rwd_rms,
-            'obs_rms': self.obs_rms
+            'obs_rms': self.obs_rms,
+            'drop_last_channel': self.drop_last_channel,
         }
 
         params_to_save = self.get_parameters()

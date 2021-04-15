@@ -61,6 +61,7 @@ class IcmWrapper(BaseTFWrapper):
     :param learning_rate: (float) Learning rate for the Adam optimizer of the predictor network.
     :param beta: (float) A scalar that weighs the inverse model loss against the forward model loss.
     :param n_hidden: (float) Dimension of the mapped observation space.
+    :param drop_last_channel: (bool) Drop last channel of the obs. Use together with extra-feature augmented policies.
     """
 
     def __init__(self, env,
@@ -71,7 +72,9 @@ class IcmWrapper(BaseTFWrapper):
                  filter_reward: bool = False, norm_obs: bool = True,
                  norm_ext_reward: bool = True, gamma: float = 0.99, learning_rate: float = 0.0001,
                  training: bool = True, _init_setup_model=True,
-                 beta: float = 0.5, n_hidden: int = 256):
+                 beta: float = 0.5, n_hidden: int = 256,
+                 drop_last_channel: bool = False,
+                 ):
 
         super().__init__(env, _init_setup_model)
 
@@ -90,6 +93,7 @@ class IcmWrapper(BaseTFWrapper):
         self.gamma = gamma  # Discount
         self.learning_rate = learning_rate
         self.training = training
+        self.drop_last_channel = drop_last_channel
 
         self.epsilon = 1e-8
         self.int_rwd_rms = RunningMeanStd(shape=(), epsilon=self.epsilon)
@@ -150,6 +154,9 @@ class IcmWrapper(BaseTFWrapper):
                 self.venv.observation_space, scale=(self.network_type == "cnn"), name='ob_curr')
             self.observation_ph_next, self.processed_obs_next = observation_input(
                 self.venv.observation_space, scale=(self.network_type == "cnn"), name='ob_next')
+            if self.drop_last_channel:
+                self.processed_obs_current = self.processed_obs_current[..., :-1]
+                self.processed_obs_next = self.processed_obs_next[..., :-1]
 
             # placeholders for a_t
             # action_ph.shape = (n_batch,), i.e. a list of action ids
@@ -362,6 +369,7 @@ class IcmWrapper(BaseTFWrapper):
             'obs_rms': self.obs_rms,
             'beta': self.beta,
             'n_hidden': self.n_hidden,
+            'drop_last_channel': self.drop_last_channel,
         }
 
         params_to_save = self.get_parameters()
