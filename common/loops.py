@@ -64,7 +64,17 @@ def train_ppo(
 
         if params['curiosity_type'] == 'RDN':
             try:
-                env = RdnWrapper.load(params['curiosity_load_path'], env)
+                env = RdnWrapper.load(
+                    params['curiosity_load_path'], env,
+                    intrinsic_reward_weight=params['intrinsic_reward_weight'],
+                    norm_ext_reward=params['normalize_extrinsic_reward'],
+                    buffer_size=params['curiosity_buffer_size'],
+                    train_freq=params['curiosity_train_freq'],
+                    opt_steps=params['curiosity_opt_steps'],
+                    batch_size=params['curiosity_batch_size'],
+                    gamma=params['curiosity_gamma'],
+                    learning_rate=params['curiosity_learning_rate'],
+                )
                 print("RDN Curiosity model loaded")
             except ValueError:
                 print("Failed to load RDN curiosity model, creating new...")
@@ -82,7 +92,17 @@ def train_ppo(
                 )
         elif params['curiosity_type'] == 'ICM':
             try:
-                env = IcmWrapper.load(params['curiosity_load_path'], env)
+                env = IcmWrapper.load(
+                    params['curiosity_load_path'], env,
+                    intrinsic_reward_weight=params['intrinsic_reward_weight'],
+                    norm_ext_reward=params['normalize_extrinsic_reward'],
+                    buffer_size=params['curiosity_buffer_size'],
+                    train_freq=params['curiosity_train_freq'],
+                    opt_steps=params['curiosity_opt_steps'],
+                    batch_size=params['curiosity_batch_size'],
+                    gamma=params['curiosity_gamma'],
+                    learning_rate=params['curiosity_learning_rate'],
+                )
                 print("ICM Curiosity model loaded")
             except ValueError:
                 print("Failed to load ICM curiosity model, creating new...")
