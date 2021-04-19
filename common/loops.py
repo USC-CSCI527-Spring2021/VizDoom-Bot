@@ -23,6 +23,7 @@ from common.i_reward_shaper import IRewardShaper
 from common.vec_curiosity_wrapper_rdn import RdnWrapper
 from common.vec_curiosity_wrapper_icm import IcmWrapper
 from common.policies import AugmentedCnnLstmPolicy
+from common.augmented_ppo2 import AugmentedPPO2
 from typing import Dict, Tuple, Any, Type, List, Union, Optional
 
 
@@ -30,9 +31,12 @@ def train_ppo(
         constants: Dict[str, Any],
         params: Dict[str, Any],
         policy: Type[BasePolicy] = CnnPolicy,
+        is_augmented_ppo: bool = False,
 ):
     is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
     is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+    # use AugmentedPPO2 to force exploration during policy rollout
+    model = AugmentedPPO2 if is_augmented_ppo else PPO2
 
     env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
@@ -131,7 +135,7 @@ def train_ppo(
             'n_extra_features': len(constants['extra_features']),
         }
     try:
-        agent = PPO2.load(
+        agent = model.load(
             params['save_path'], env=env,
             gamma=params['discount_factor'],
             n_steps=params['max_steps_per_episode'],
@@ -144,7 +148,7 @@ def train_ppo(
         print("Model loaded")
     except ValueError:
         print("Failed to load model, training from scratch...")
-        agent = PPO2(
+        agent = model(
             policy, env,
             gamma=params['discount_factor'],
             n_steps=params['max_steps_per_episode'],

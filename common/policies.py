@@ -189,13 +189,20 @@ class AugmentedLstmPolicy(RecurrentActorCriticPolicy):
                     self.pdtype.proba_distribution_from_latent(latent_policy, latent_value)
         self._setup_init()
 
-    def step(self, obs, state=None, mask=None, deterministic=False):
+    def step(self, obs, state=None, mask=None, deterministic=False, exploration_prob=0.0):
         if deterministic:
             return self.sess.run([self.deterministic_action, self.value_flat, self.snew, self.neglogp],
                                  {self.obs_ph: obs, self.states_ph: state, self.dones_ph: mask})
         else:
-            return self.sess.run([self.action, self.value_flat, self.snew, self.neglogp],
-                                 {self.obs_ph: obs, self.states_ph: state, self.dones_ph: mask})
+            # return self.sess.run([self.action, self.value_flat, self.snew, self.neglogp],
+            #                      {self.obs_ph: obs, self.states_ph: state, self.dones_ph: mask})
+            rst = self.sess.run([self.action, self.value_flat, self.snew, self.neglogp],
+                                {self.obs_ph: obs, self.states_ph: state, self.dones_ph: mask})
+            # force exploration during training
+            if exploration_prob is not None and exploration_prob > 0.0 and np.random.rand() <= exploration_prob:
+                # print(f'[AugmentedLstmPolicy] Randomly choose action to explore')
+                rst[0] = np.random.randint(0, self.ac_space.n, size=rst[0].shape)
+            return rst
 
     def proba_step(self, obs, state=None, mask=None):
         return self.sess.run(self.policy_proba, {self.obs_ph: obs, self.states_ph: state, self.dones_ph: mask})
