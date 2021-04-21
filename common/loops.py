@@ -43,6 +43,7 @@ def train_ppo(
         'frames_to_skip', 'history_length', 'visible_training', 'use_attention',
         'attention_ratio', 'reward_shaper', 'num_bots',
     ]
+    # detect if extra_feature is used
     use_extra_feature = False
     if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
             and len(constants['extra_features']) > 0 \
@@ -52,6 +53,9 @@ def train_ppo(
         use_extra_feature = True
     if use_extra_feature and not is_augmented_policy:
         raise ValueError('use_extra_feature must be used together with an augmented policy')
+    # detect if complete_before_timeout_reward is used
+    if 'complete_before_timeout_reward' in constants:
+        env_kwargs_keys.append('complete_before_timeout_reward')
     env_kwargs = collect_kv(constants, params, keys=env_kwargs_keys)
     env_kwargs['visible'] = env_kwargs['visible_training']
     del env_kwargs['visible_training']
@@ -229,6 +233,7 @@ def evaluate_ppo(
         'frames_to_skip', 'history_length', 'use_attention',
         'attention_ratio', 'reward_shaper', 'num_bots'
     ]
+    # detect if extra_features is used
     use_extra_feature = False
     if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
             and len(constants['extra_features']) > 0 \
@@ -238,6 +243,9 @@ def evaluate_ppo(
         use_extra_feature = True
     if use_extra_feature and not is_augmented_policy:
         raise ValueError('use_extra_feature must be used together with an augmented policy')
+    # detect if complete_before_timeout_reward is used
+    if 'complete_before_timeout_reward' in constants:
+        eval_env_kwargs_keys.append('complete_before_timeout_reward')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
@@ -307,6 +315,7 @@ def record_evaluate_ppo(
         'frames_to_skip', 'history_length', 'use_attention',
         'attention_ratio', 'reward_shaper', 'num_bots'
     ]
+    # detect if extra_features is used
     use_extra_feature = False
     if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
             and len(constants['extra_features']) > 0 \
@@ -316,6 +325,9 @@ def record_evaluate_ppo(
         use_extra_feature = True
     if use_extra_feature and not is_augmented_policy:
         raise ValueError('use_extra_feature must be used together with an augmented policy')
+    # detect if complete_before_timeout_reward is used
+    if 'complete_before_timeout_reward' in constants:
+        eval_env_kwargs_keys.append('complete_before_timeout_reward')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False

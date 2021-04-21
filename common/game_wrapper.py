@@ -38,6 +38,7 @@ class DoomEnv(gym.Env):
             overwrite_episode_timeout: Optional[int] = None,
             extra_features: Optional[List[int]] = None,
             extra_features_norm_factor: Optional[List[Union[int, float]]] = None,
+            complete_before_timeout_reward: float = 0.0,
     ):
         super(DoomEnv, self).__init__()
         # vizdoom game init
@@ -82,7 +83,7 @@ class DoomEnv(gym.Env):
         self.extra_features = extra_features
         self.extra_features_norm_factor = extra_features_norm_factor
         if extra_features is not None and len(extra_features) > 0:
-            assert extra_features_norm_factor is not None and len(extra_features) == len(extra_features_norm_factor),\
+            assert extra_features_norm_factor is not None and len(extra_features) == len(extra_features_norm_factor), \
                 'length of extra_features and extra_features_norm_factor mismatch'
             assert len(extra_features) <= self.height * self.width, 'too many extra features'
             self.num_channels += 1
@@ -93,6 +94,7 @@ class DoomEnv(gym.Env):
         self.state = None
         self.state_attention = None
         self.state_extra_feature = None
+        self.complete_before_timeout_reward = complete_before_timeout_reward
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -206,6 +208,11 @@ class DoomEnv(gym.Env):
             shaping_reward = self.reward_shaper.calc_reward(new_vars) \
                 if self.reward_shaper is not None else 0.0
 
+        complete_before_timeout_reward = 0.0
+        is_dead = self.env.get_game_variable(vzd.GameVariable.DEAD) > 0.0
+        if done and not is_dead and self.env.get_episode_time() <= self.env.get_episode_timeout():
+            complete_before_timeout_reward = self.complete_before_timeout_reward
+
         self.frame = new_frame
         processed_frame = process_frame(new_frame, self.preprocess_shape, normalize=self.use_extra_feature)
         self.state = np.append(self.state[:, :, 1:], processed_frame, axis=-1)
@@ -219,7 +226,7 @@ class DoomEnv(gym.Env):
 
         obs_dtype = np.float32 if self.use_extra_feature else np.uint8
         return self.get_state().astype(obs_dtype), \
-               reward + shaping_reward, \
+               reward + shaping_reward + complete_before_timeout_reward, \
                done, \
                {
                    'shaping_reward': shaping_reward,
