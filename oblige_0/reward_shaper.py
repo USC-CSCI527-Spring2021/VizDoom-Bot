@@ -130,7 +130,6 @@ class RewardShaper(IRewardShaper):
 
 
 def test_reward_shaper():
-    game_args = CONSTANTS_DICT['game_args']
     g = DoomEnv(
         scenario_cfg_path=CONSTANTS_DICT['scenario_cfg_path'],
         action_list=CONSTANTS_DICT['action_list'],
@@ -143,11 +142,11 @@ def test_reward_shaper():
         use_attention=True,
         attention_ratio=0.5,
         reward_shaper=RewardShaper,
-        game_args=game_args,
-        num_bots=0,
+        game_args=CONSTANTS_DICT['game_args'],
+        num_bots=CONSTANTS_DICT['num_bots'],
         overwrite_episode_timeout=None,
-        extra_features=[vzd.GameVariable.HEALTH, vzd.GameVariable.AMMO5, vzd.GameVariable.ARMOR],
-        extra_features_norm_factor=[100.0, 50.0, 200.0],
+        extra_features=CONSTANTS_DICT['extra_features'],
+        extra_features_norm_factor=CONSTANTS_DICT['extra_features_norm_factor'],
         complete_before_timeout_reward=CONSTANTS_DICT['complete_before_timeout_reward'],
     )
     rs = g.reward_shaper

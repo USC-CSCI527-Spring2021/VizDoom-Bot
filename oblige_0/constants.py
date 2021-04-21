@@ -55,7 +55,7 @@ ACTION_LIST = [
 
 CONSTANTS_DICT = {
     'scenario_cfg_path': '../scenarios/oblige_0.cfg',
-    'game_args': '',
+    'game_args': '+viz_nocheat 0',
     'num_bots': 0,
     'action_list': ACTION_LIST,
     'num_actions': len(ACTION_LIST),
@@ -72,11 +72,11 @@ CONSTANTS_DICT = {
     ],
     'extra_features_norm_factor': [
         100.0, 200.0,
-        200.0, 200.0,
-        200.0, 200.0,
-        200.0, 200.0,
-        200.0, 200.0,
-        200.0, 200.0,
+        300.0, 300.0,
+        300.0, 300.0,
+        300.0, 300.0,
+        300.0, 300.0,
+        300.0, 300.0,
     ],
     'complete_before_timeout_reward': 4.0,
 }
