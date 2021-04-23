@@ -8,6 +8,7 @@
 import gym
 import vizdoom as vzd
 import numpy as np
+import random
 
 from common.utils import process_frame
 from common.i_reward_shaper import IRewardShaper
@@ -20,7 +21,7 @@ class DoomEnv(gym.Env):
 
     def __init__(
             self,
-            scenario_cfg_path: str,
+            scenario_cfg_path: Union[str, List[str]],
             action_list: List[List[bool]],
             preprocess_shape=(120, 120),
             frames_to_skip=4,
@@ -41,35 +42,45 @@ class DoomEnv(gym.Env):
             complete_before_timeout_reward: float = 0.0,
     ):
         super(DoomEnv, self).__init__()
-        # vizdoom game init
-        game = vzd.DoomGame()
-        game.load_config(scenario_cfg_path)
-        if overwrite_episode_timeout is not None:
-            game.set_episode_timeout(overwrite_episode_timeout)
-        game.set_window_visible(visible)
-        if is_spec:
-            game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
-        else:
-            if is_sync:
-                game.set_mode(vzd.Mode.PLAYER)
-            else:
-                game.set_mode(vzd.Mode.ASYNC_PLAYER)
-        if screen_format is None:
-            game.set_screen_format(vzd.ScreenFormat.GRAY8)
-        else:
-            game.set_screen_format(screen_format)
-        game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
-        self.reward_shaper = None
-        if reward_shaper is not None:
-            self.reward_shaper = reward_shaper()
-            game.set_available_game_variables(self.reward_shaper.get_subscribed_game_var_list())
-        if len(game_args) > 0:
-            game.add_game_args(game_args)
-        if len(game_map) > 0:
-            game.set_doom_map(game_map)
-        game.init()
+        self.scenario_cfg_path = scenario_cfg_path
 
-        self.env = game
+        # vizdoom game init
+        def _init_game(cfg_path: str):
+            game = vzd.DoomGame()
+            game.load_config(cfg_path)
+            if overwrite_episode_timeout is not None:
+                game.set_episode_timeout(overwrite_episode_timeout)
+            game.set_window_visible(visible)
+            if is_spec:
+                game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
+            else:
+                if is_sync:
+                    game.set_mode(vzd.Mode.PLAYER)
+                else:
+                    game.set_mode(vzd.Mode.ASYNC_PLAYER)
+            if screen_format is None:
+                game.set_screen_format(vzd.ScreenFormat.GRAY8)
+            else:
+                game.set_screen_format(screen_format)
+            game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
+            rs = None
+            if reward_shaper is not None:
+                rs = reward_shaper()
+                game.set_available_game_variables(rs.get_subscribed_game_var_list())
+            if len(game_args) > 0:
+                game.add_game_args(game_args)
+            if len(game_map) > 0:
+                game.set_doom_map(game_map)
+            game.init()
+            return game, rs
+
+        self._init_game_f = _init_game
+        self.reward_shaper = None
+        if type(self.scenario_cfg_path) is list:
+            self.env, self.reward_shaper = self._init_game_f(random.choice(self.scenario_cfg_path))
+        else:
+            self.env, self.reward_shaper = self._init_game_f(self.scenario_cfg_path)
+
         self.action_list = action_list
         self.preprocess_shape = preprocess_shape
         self.frames_to_skip = frames_to_skip
@@ -134,6 +145,10 @@ class DoomEnv(gym.Env):
         """
         Resets the environment and return initial state.
         """
+        # we need to reinitialize the VizDoom instance if we want to change scenario
+        if type(self.scenario_cfg_path) is list:
+            self.env, self.reward_shaper = self._init_game_f(random.choice(self.scenario_cfg_path))
+
         if self.num_bots > 0:
             # Add specific number of bots
             # (file examples/bots.cfg must be placed in the same directory as the Doom executable file,

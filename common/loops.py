@@ -173,6 +173,8 @@ def train_ppo(
     )
     # eval periodically
     eval_env_kwargs = env_kwargs
+    if 'eval_scenario_cfg_path' in constants:
+        eval_env_kwargs['scenario_cfg_path'] = constants['eval_scenario_cfg_path']
     eval_env_kwargs['visible'] = False
     eval_env_kwargs['is_sync'] = True
     eval_env = make_vec_env(
@@ -247,6 +249,8 @@ def evaluate_ppo(
     if 'complete_before_timeout_reward' in constants:
         eval_env_kwargs_keys.append('complete_before_timeout_reward')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
+    if 'eval_scenario_cfg_path' in constants:
+        eval_env_kwargs['scenario_cfg_path'] = constants['eval_scenario_cfg_path']
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
     if overwrite_frames_to_skip is not None:
@@ -329,6 +333,8 @@ def record_evaluate_ppo(
     if 'complete_before_timeout_reward' in constants:
         eval_env_kwargs_keys.append('complete_before_timeout_reward')
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
+    if 'eval_scenario_cfg_path' in constants:
+        eval_env_kwargs['scenario_cfg_path'] = constants['eval_scenario_cfg_path']
     eval_env_kwargs['visible'] = True
     eval_env_kwargs['is_sync'] = False
     eval_env_kwargs['screen_format'] = vzd.ScreenFormat.CRCGCB

@@ -291,7 +291,7 @@ class IcmWrapper(BaseTFWrapper):
         # In the ICM paper, the intrinsic reward is scaled by eta/2.
         # This is equivalent to intrinsic_reward_weight we have here.
         reward = np.squeeze(extrinsic_reward + self.intrinsic_reward_weight * intrinsic_reward)
-        # print("intrinsic_reward: {}".format(intrinsic_reward))
+        # print("intrinsic_reward: {}".format(self.intrinsic_reward_weight * intrinsic_reward))
         # print("extrinsic_reward: {}".format(extrinsic_reward))
         # print("reward: {}".format(reward))
 
