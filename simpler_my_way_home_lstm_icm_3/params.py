@@ -44,7 +44,7 @@ PARAMS_DICT = {
     # curiosity related params
     'use_curiosity': True,
     'curiosity_type': 'ICM',
-    'intrinsic_reward_weight': 1.0,
+    'intrinsic_reward_weight': 100.0,
     'normalize_extrinsic_reward': True,
     'curiosity_save_path': 'curiosity_saved_model',
     'curiosity_load_path': 'curiosity_saved_model',
