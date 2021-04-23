@@ -17,7 +17,7 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 from common.utils import make_expand_action_f
 
 # atomic actions
-NUM_ATOMIC_ACTIONS = 7
+NUM_ATOMIC_ACTIONS = 8
 MOVE_FORWARD = 0
 MOVE_BACKWARD = 1
 MOVE_LEFT = 2
