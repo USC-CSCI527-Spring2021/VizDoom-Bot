@@ -19,4 +19,4 @@ from constants import *
 from params import *
 
 if __name__ == '__main__':
-    train_ppo(CONSTANTS_DICT, PARAMS_DICT, policy=AugmentedCnnLstmPolicy, is_augmented_ppo=True)
+    train_ppo(CONSTANTS_DICT, PARAMS_DICT, policy=AugmentedCnnLstmPolicy, is_augmented_ppo=False)

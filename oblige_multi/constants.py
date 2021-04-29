@@ -60,7 +60,7 @@ CONSTANTS_DICT = {
         '../scenarios/oblige_maps/oblige_2.cfg',
     ],
     'eval_scenario_cfg_path': [
-        '../scenarios/oblige_maps/oblige_3.cfg',
+        '../scenarios/oblige_maps/oblige_1.cfg',
     ],
     'game_args': '+viz_nocheat 0',
     'num_bots': 0,

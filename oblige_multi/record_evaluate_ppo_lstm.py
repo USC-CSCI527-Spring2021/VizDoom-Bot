@@ -22,13 +22,12 @@ if __name__ == '__main__':
     record_evaluate_ppo(
         CONSTANTS_DICT, PARAMS_DICT,
         action_names=[
-            'N', 'F', 'B', 'L', 'R', 'TL', 'TR', 'A',
-            'FTL', 'FTR', 'LTR', 'RTL',
-            'FA', 'BA', 'LA', 'RA',
+            'N', 'F', 'B', 'L', 'R', 'TL', 'TR', 'A', 'U',
         ],
         filename='./evaluation.mp4',
         policy=AugmentedCnnLstmPolicy,
         episodes_to_eval=1,
         deterministic=False,
         overwrite_frames_to_skip=None,
+        overwrite_episode_timeout=500,
     )

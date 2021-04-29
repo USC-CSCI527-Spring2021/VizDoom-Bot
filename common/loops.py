@@ -308,6 +308,7 @@ def record_evaluate_ppo(
         policy: Type[BasePolicy] = CnnPolicy,
         episodes_to_eval: int = 1, deterministic: bool = False,
         overwrite_frames_to_skip: Optional[int] = None,
+        overwrite_episode_timeout: Optional[int] = None,
 ):
     assert len(action_names) == constants['num_actions'], 'length of action_names and num_actions mismatch'
 
@@ -340,7 +341,7 @@ def record_evaluate_ppo(
     eval_env_kwargs['screen_format'] = vzd.ScreenFormat.CRCGCB
     if overwrite_frames_to_skip is not None:
         eval_env_kwargs['frames_to_skip'] = overwrite_frames_to_skip
-    eval_env = DoomEnv(**eval_env_kwargs)
+    eval_env = DoomEnv(**eval_env_kwargs, overwrite_episode_timeout=overwrite_episode_timeout)
 
     try:
         agent = PPO2.load(params['save_path'])
@@ -411,3 +412,85 @@ def record_evaluate_ppo(
     for f, p in tqdm.tqdm(zip(frames, action_probs), total=len(frames)):
         out.write(_render_step(f, p))
     out.release()
+
+
+def deathmatch_ppo(
+        constants: Dict[str, Any], params: Dict[str, Any], policy: Type[BasePolicy] = CnnPolicy,
+        deterministic: bool = False,
+        overwrite_frames_to_skip: Optional[int] = None
+):
+    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
+    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+
+    eval_env_kwargs_keys = [
+        'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
+        'frames_to_skip', 'history_length', 'use_attention',
+        'attention_ratio', 'reward_shaper', 'num_bots'
+    ]
+    # detect if extra_features is used
+    use_extra_feature = False
+    if 'extra_features' in constants and 'extra_features_norm_factor' in constants \
+            and len(constants['extra_features']) > 0 \
+            and len(constants['extra_features_norm_factor']) > 0:
+        eval_env_kwargs_keys.append('extra_features')
+        eval_env_kwargs_keys.append('extra_features_norm_factor')
+        use_extra_feature = True
+    if use_extra_feature and not is_augmented_policy:
+        raise ValueError('use_extra_feature must be used together with an augmented policy')
+    # detect if complete_before_timeout_reward is used
+    if 'complete_before_timeout_reward' in constants:
+        eval_env_kwargs_keys.append('complete_before_timeout_reward')
+    eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
+    if 'eval_scenario_cfg_path' in constants:
+        eval_env_kwargs['scenario_cfg_path'] = constants['eval_scenario_cfg_path']
+    eval_env_kwargs['visible'] = True
+    eval_env_kwargs['is_sync'] = False
+    if overwrite_frames_to_skip is not None:
+        eval_env_kwargs['frames_to_skip'] = overwrite_frames_to_skip
+
+    agent = None
+    try:
+        agent = PPO2.load(params['save_path'])
+        print("Model loaded")
+    except ValueError:
+        print("Failed to load model")
+        exit(-1)
+
+    # bootstrap the network
+    random_obs = _get_random_obs(constants, params)
+    if is_recurrent_policy:
+        # random_zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
+        # TODO: use variable observation_space instead of fixed numbers
+        random_zero_completed_obs = np.zeros((params['num_envs'], 120, 120, 9))
+        random_zero_completed_obs[0, :] = random_obs
+        random_obs = random_zero_completed_obs
+    agent.predict(random_obs)
+
+    eval_env = DoomEnv(**eval_env_kwargs, overwrite_episode_timeout=0)
+
+    obs = eval_env.reset(new_episode=False)
+    if is_recurrent_policy:
+        state = None
+        zero_completed_obs = np.zeros((params['num_envs'],) + eval_env.observation_space.shape)
+        zero_completed_obs[0, :] = obs
+    done = False
+    frags = 0
+    deaths = 0
+    i = 0
+    while not done:
+        i += 1
+        frags = int(eval_env.env.get_game_variable(vzd.GameVariable.FRAGCOUNT))
+        deaths = int(eval_env.env.get_game_variable(vzd.GameVariable.DEATHCOUNT))
+        if i % 300 == 0:
+            print(f'FRAGS: {frags}')
+            print(f'DEATHS: {deaths}')
+        if is_recurrent_policy:
+            action, state = agent.predict(zero_completed_obs, state, deterministic=deterministic)
+            new_obs, _, done, _ = eval_env.step(action[0], smooth_rendering=True)
+            zero_completed_obs[0, :] = new_obs
+        else:
+            action, _ = agent.predict(obs, deterministic=deterministic)
+            obs, _, done, _ = eval_env.step(action, smooth_rendering=True)
+
+    print(f'Final FRAGS: {frags}')
+    print(f'Final DEATHS: {deaths}')

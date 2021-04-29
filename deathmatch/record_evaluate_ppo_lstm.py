@@ -23,12 +23,15 @@ if __name__ == '__main__':
         CONSTANTS_DICT, PARAMS_DICT,
         action_names=[
             'N', 'F', 'B', 'L', 'R', 'TL', 'TR', 'A',
-            'FTL', 'FTR', 'LTR', 'RTL',
-            'FA', 'BA', 'LA', 'RA',
+            'W1', 'W2', 'W3', 'W4', 'W5', 'W6',
+            'FS', 'BS', 'LS', 'RS',
+            'FA', 'BA', 'LA', 'RA', 'TLA', 'TRA',
+            'LAS', 'RAS',
         ],
         filename='./evaluation.mp4',
         policy=AugmentedCnnLstmPolicy,
         episodes_to_eval=1,
         deterministic=False,
         overwrite_frames_to_skip=None,
+        overwrite_episode_timeout=None,
     )

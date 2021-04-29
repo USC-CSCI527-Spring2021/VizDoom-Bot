@@ -30,8 +30,8 @@ PARAMS_DICT = {
     'use_attention': True,
     'attention_ratio': 0.5,
     'reward_shaper': RewardShaper,  # set to None to disable reward shaping
-    'learning_rate_beg': 0.00005,
-    'learning_rate_end': 0.00001,
+    'learning_rate_beg': 0.00008,
+    'learning_rate_end': 0.00005,
     'discount_factor': 0.99,  # gamma
     'max_steps_per_episode': 256,
     'grad_clip_norm': 0.5,
@@ -44,16 +44,16 @@ PARAMS_DICT = {
     # curiosity related params
     'use_curiosity': True,
     'curiosity_type': 'ICM',
-    'intrinsic_reward_weight': 1.0,
+    'intrinsic_reward_weight': 10.0,
     'normalize_extrinsic_reward': True,
     'curiosity_save_path': 'curiosity_saved_model',
     'curiosity_load_path': 'curiosity_saved_model',
-    'curiosity_buffer_size': 4096,
-    'curiosity_train_freq': 5000,
+    'curiosity_buffer_size': 2000,
+    'curiosity_train_freq': 2000,
     'curiosity_opt_steps': 4,
     'curiosity_batch_size': 128,
     'curiosity_gamma': 0.99,
-    'curiosity_learning_rate': 0.0001,
+    'curiosity_learning_rate': 0.001,
     'curiosity_icm_beta': 0.2,
     'curiosity_icm_n_hidden': 288,
 }

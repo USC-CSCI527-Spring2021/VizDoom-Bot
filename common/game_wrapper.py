@@ -141,7 +141,7 @@ class DoomEnv(gym.Env):
                 self.state_extra_feature[i] = float(self.env.get_game_variable(f)) / float(fn)
             self.state_extra_feature = self.state_extra_feature.reshape((self.height, self.width, 1))
 
-    def reset(self) -> np.ndarray:
+    def reset(self, new_episode: bool = True) -> np.ndarray:
         """
         Resets the environment and return initial state.
         """
@@ -156,7 +156,8 @@ class DoomEnv(gym.Env):
             self.env.send_game_command('removebots')
             for i in range(self.num_bots):
                 self.env.send_game_command('addbot')
-        self.env.new_episode()
+        if new_episode:
+            self.env.new_episode()
         init_state = self.env.get_state()
         self.frame = init_state.screen_buffer
         if self.reward_shaper is not None:

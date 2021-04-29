@@ -112,7 +112,7 @@ class RewardShaper(IRewardShaper):
             # penalty for hits taken
             # r += -0.1 if new_game_vars[4] > self.hits_taken else 0.0
             # extra penalty for suicide
-            r += -0.5 if new_game_vars[11] < self.frag_count else 0.0
+            r += -0.2 if new_game_vars[11] < self.frag_count else 0.0
             # reward for armor-pickups
             r += 0.30 if new_game_vars[6] > self.armor else 0.0
 
