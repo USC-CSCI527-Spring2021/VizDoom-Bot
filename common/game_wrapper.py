@@ -106,6 +106,7 @@ class DoomEnv(gym.Env):
         self.state_attention = None
         self.state_extra_feature = None
         self.complete_before_timeout_reward = complete_before_timeout_reward
+        self.frags = 0
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -178,6 +179,7 @@ class DoomEnv(gym.Env):
             )
         self.update_extra_feature()
 
+        print(f'FRAGS: {self.frags}')
         return self.get_state()
 
     def step(self, action: int, smooth_rendering=False) \
@@ -203,6 +205,7 @@ class DoomEnv(gym.Env):
             shaping_reward = self.reward_shaper.calc_reward(state.game_variables) \
                 if self.reward_shaper is not None and state is not None else 0.0
             frames.append(new_frame)
+            self.frags = int(self.env.get_game_variable(vzd.GameVariable.FRAGCOUNT))
         else:
             self.env.set_action(self.action_list[action])
             reward = 0.0
@@ -221,6 +224,7 @@ class DoomEnv(gym.Env):
                     new_frame = state.screen_buffer
                     new_vars = state.game_variables
                     frames.append(new_frame)
+                    self.frags = int(self.env.get_game_variable(vzd.GameVariable.FRAGCOUNT))
             shaping_reward = self.reward_shaper.calc_reward(new_vars) \
                 if self.reward_shaper is not None else 0.0
 
