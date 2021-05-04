@@ -1,0 +1,6 @@
+__pycache__/
+.idea/
+
+*/_vizdoom/
+*/model_ckpt/
+*/spec_raw_data/
