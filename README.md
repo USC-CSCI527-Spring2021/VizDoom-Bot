@@ -45,7 +45,7 @@ for your reference:
 - cudnn: 7.6.5
 
 **TIPS**: using [Conda](https://docs.conda.io/en/latest/miniconda.html)
-to manage different lib versions and virtual environments are
+to manage different lib versions and virtual environments is
 highly recommended.
 
 ## Directions to Run the Agent
@@ -70,7 +70,7 @@ python3 evaluate_ppo_lstm.py
 python3 record_evaluate_ppo_lstm.py
 ```
 
-## Direction to Run a Deathmatch
+## Directions to Run a Deathmatch
 ```shell
 # In terminal 1
 # Start the host
