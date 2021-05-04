@@ -23,8 +23,13 @@ from common.i_reward_shaper import IRewardShaper
 from common.vec_curiosity_wrapper_rdn import RdnWrapper
 from common.vec_curiosity_wrapper_icm import IcmWrapper
 from common.policies import AugmentedCnnLstmPolicy
+from common.larger_policies import AugLargerLnCnnLstmPolicy
 from common.augmented_ppo2 import AugmentedPPO2
 from typing import Dict, Tuple, Any, Type, List, Union, Optional
+
+
+RECURRENT_POLICIES = (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy, AugLargerLnCnnLstmPolicy)
+AUGMENTED_POLICIES = (AugmentedCnnLstmPolicy, AugLargerLnCnnLstmPolicy)
 
 
 def train_ppo(
@@ -33,8 +38,8 @@ def train_ppo(
         policy: Type[BasePolicy] = CnnPolicy,
         is_augmented_ppo: bool = False,
 ):
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
-    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+    is_recurrent_policy = policy in RECURRENT_POLICIES
+    is_augmented_policy = policy in AUGMENTED_POLICIES
     # use AugmentedPPO2 to force exploration during policy rollout
     model = AugmentedPPO2 if is_augmented_ppo else PPO2
 
@@ -227,8 +232,8 @@ def evaluate_ppo(
         episodes_to_eval: int = 10, deterministic: bool = False,
         overwrite_frames_to_skip: Optional[int] = None
 ):
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
-    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+    is_recurrent_policy = policy in RECURRENT_POLICIES
+    is_augmented_policy = policy in AUGMENTED_POLICIES
 
     eval_env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
@@ -312,8 +317,8 @@ def record_evaluate_ppo(
 ):
     assert len(action_names) == constants['num_actions'], 'length of action_names and num_actions mismatch'
 
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
-    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+    is_recurrent_policy = policy in RECURRENT_POLICIES
+    is_augmented_policy = policy in AUGMENTED_POLICIES
 
     eval_env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
@@ -419,8 +424,8 @@ def deathmatch_ppo(
         deterministic: bool = False,
         overwrite_frames_to_skip: Optional[int] = None
 ):
-    is_recurrent_policy = policy in (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy)
-    is_augmented_policy = policy in (AugmentedCnnLstmPolicy,)
+    is_recurrent_policy = policy in RECURRENT_POLICIES
+    is_augmented_policy = policy in AUGMENTED_POLICIES
 
     eval_env_kwargs_keys = [
         'scenario_cfg_path', 'game_args', 'action_list', 'preprocess_shape',
