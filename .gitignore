@@ -5,7 +5,10 @@ __pycache__/
 */tf_board/
 */*_ckpt/
 */*_backup/
+*/*_backup_*/
+*/*_bak/
 */record_videos/
 */logs/
 *saved_model*
+!archive_models/**/*saved_model*
 *.mp4
