@@ -14,9 +14,10 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 from stable_baselines.common.policies import CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy, BasePolicy
 from common.policies import AugmentedCnnLstmPolicy
+from common.larger_policies import AugLargerLnCnnLstmPolicy
 from common.loops import *
 from constants import *
 from params import *
 
 if __name__ == '__main__':
-    deathmatch_ppo(CONSTANTS_DICT, PARAMS_DICT, AugmentedCnnLstmPolicy, deterministic=True)
+    deathmatch_ppo(CONSTANTS_DICT, PARAMS_DICT, AugLargerLnCnnLstmPolicy, deterministic=True)

@@ -19,4 +19,4 @@ from constants import *
 from params import *
 
 if __name__ == '__main__':
-    deathmatch_ppo(CONSTANTS_DICT, PARAMS_DICT, AugmentedCnnLstmPolicy, deterministic=True)
+    deathmatch_ppo(CONSTANTS_DICT, PARAMS_DICT, AugmentedCnnLstmPolicy, deterministic=False)
