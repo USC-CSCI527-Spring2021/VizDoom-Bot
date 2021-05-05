@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File  : evaluate_ppo.py
+# @File  : train_ppo_lstm.py
 # @Author: harry
-# @Date  : 2/18/21 9:17 PM
-# @Desc  : Evaluate the agent
+# @Date  : 2/18/21 7:30 PM
+# @Desc  : Train the agent (PPO with a CNN-LSTM policy network)
 
 import sys
 import os
@@ -14,14 +14,10 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 from stable_baselines.common.policies import CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy, BasePolicy
 from common.policies import AugmentedCnnLstmPolicy
+from common.larger_policies import AugLargerLnCnnLstmPolicy
 from common.loops import *
 from constants import *
 from params import *
 
 if __name__ == '__main__':
-    evaluate_ppo(
-        CONSTANTS_DICT, PARAMS_DICT, AugmentedCnnLstmPolicy, 10, deterministic=False,
-        overwrite_episode_timeout=30 * 60 * 10,  # 10 minutes
-        visible=False, is_sync=True,
-        save_scoreboard_image=True,
-    )
+    train_ppo(CONSTANTS_DICT, PARAMS_DICT, policy=AugLargerLnCnnLstmPolicy, is_augmented_ppo=True)

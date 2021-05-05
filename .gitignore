@@ -12,3 +12,4 @@ __pycache__/
 *saved_model*
 !archive_models/**/*saved_model*
 *.mp4
+*.png

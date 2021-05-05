@@ -251,6 +251,8 @@ class DoomEnv(gym.Env):
                {
                    'shaping_reward': shaping_reward,
                    'frames': frames,
+                   'frags': self.frags,
+                   'is_dead': is_dead,
                }
 
     def render(self, mode='human'):

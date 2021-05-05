@@ -27,7 +27,6 @@ from common.larger_policies import AugLargerLnCnnLstmPolicy
 from common.augmented_ppo2 import AugmentedPPO2
 from typing import Dict, Tuple, Any, Type, List, Union, Optional
 
-
 RECURRENT_POLICIES = (CnnLstmPolicy, CnnLnLstmPolicy, AugmentedCnnLstmPolicy, AugLargerLnCnnLstmPolicy)
 AUGMENTED_POLICIES = (AugmentedCnnLstmPolicy, AugLargerLnCnnLstmPolicy)
 
@@ -230,7 +229,11 @@ def _get_random_obs(constants: Dict[str, Any], params: Dict[str, Any]) -> np.nda
 def evaluate_ppo(
         constants: Dict[str, Any], params: Dict[str, Any], policy: Type[BasePolicy] = CnnPolicy,
         episodes_to_eval: int = 10, deterministic: bool = False,
-        overwrite_frames_to_skip: Optional[int] = None
+        overwrite_frames_to_skip: Optional[int] = None,
+        overwrite_episode_timeout: Optional[int] = None,
+        visible: bool = True,
+        is_sync: bool = False,
+        save_scoreboard_image: bool = False,
 ):
     is_recurrent_policy = policy in RECURRENT_POLICIES
     is_augmented_policy = policy in AUGMENTED_POLICIES
@@ -256,11 +259,11 @@ def evaluate_ppo(
     eval_env_kwargs = collect_kv(constants, params, keys=eval_env_kwargs_keys)
     if 'eval_scenario_cfg_path' in constants:
         eval_env_kwargs['scenario_cfg_path'] = constants['eval_scenario_cfg_path']
-    eval_env_kwargs['visible'] = True
-    eval_env_kwargs['is_sync'] = False
+    eval_env_kwargs['visible'] = visible
+    eval_env_kwargs['is_sync'] = is_sync
     if overwrite_frames_to_skip is not None:
         eval_env_kwargs['frames_to_skip'] = overwrite_frames_to_skip
-    eval_env = DoomEnv(**eval_env_kwargs)
+    eval_env = DoomEnv(**eval_env_kwargs, overwrite_episode_timeout=overwrite_episode_timeout)
 
     try:
         agent = PPO2.load(params['save_path'])
@@ -279,9 +282,12 @@ def evaluate_ppo(
 
     # evaluation loop
     rewards = []
+    frags = []
     with tqdm.trange(episodes_to_eval) as t:
         for i in t:
             episode_r = 0.0
+            episode_frags = 0
+            episode_scoreboard = None
             obs = eval_env.reset()
             if is_recurrent_policy:
                 state = None
@@ -291,19 +297,33 @@ def evaluate_ppo(
             while not done:
                 if is_recurrent_policy:
                     action, state = agent.predict(zero_completed_obs, state, deterministic=deterministic)
-                    new_obs, step_r, done, _ = eval_env.step(action[0], smooth_rendering=True)
+                    new_obs, step_r, done, info = eval_env.step(action[0], smooth_rendering=True)
                     zero_completed_obs[0, :] = new_obs
                 else:
                     action, _ = agent.predict(obs, deterministic=deterministic)
-                    obs, step_r, done, _ = eval_env.step(action, smooth_rendering=True)
+                    obs, step_r, done, info = eval_env.step(action, smooth_rendering=True)
                 episode_r += step_r
+                episode_frags = info['frags']
+
+                if info['is_dead']:
+                    episode_scoreboard = info['frames'][-1]
+
             rewards.append(episode_r)
+            frags.append(episode_frags)
             t.set_description(f'Episode {i}')
             t.set_postfix(
-                episode_reward=episode_r)
+                episode_reward=episode_r,
+                episode_frags=episode_frags
+            )
+            if save_scoreboard_image and episode_scoreboard is not None:
+                cv2.imwrite(f'scoreboard_{i}.png', episode_scoreboard)
 
     rewards = np.array(rewards, dtype=np.float32)
+    frags = np.array(frags, dtype=np.float32)
+    print('Rewards stats:')
     print(f'avg: {rewards.mean()}, std: {rewards.std()}, min: {rewards.min()}, max: {rewards.max()}')
+    print('FRAGS stats:')
+    print(f'avg: {frags.mean()}, std: {frags.std()}, min: {frags.min()}, max: {frags.max()}')
 
 
 def record_evaluate_ppo(

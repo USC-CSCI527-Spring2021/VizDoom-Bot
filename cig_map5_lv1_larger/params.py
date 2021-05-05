@@ -30,8 +30,8 @@ PARAMS_DICT = {
     'use_attention': True,
     'attention_ratio': 0.5,
     'reward_shaper': RewardShaper,  # set to None to disable reward shaping
-    'learning_rate_beg': 0.00005,
-    'learning_rate_end': 0.00001,
+    'learning_rate_beg': 0.00008,
+    'learning_rate_end': 0.00005,
     'discount_factor': 0.99,  # gamma
     'max_steps_per_episode': 256,
     'grad_clip_norm': 0.5,
@@ -42,10 +42,10 @@ PARAMS_DICT = {
     # ppo related params
     'ppo_cliprange': 0.2,
     # curiosity related params
-    'use_curiosity': True,
-    'curiosity_type': 'ICM',
-    'intrinsic_reward_weight': 0.01,
-    'normalize_extrinsic_reward': True,
+    'use_curiosity': False,
+    'curiosity_type': 'RDN',
+    'intrinsic_reward_weight': 4.0,
+    'normalize_extrinsic_reward': False,
     'curiosity_save_path': 'curiosity_saved_model',
     'curiosity_load_path': 'curiosity_saved_model',
     'curiosity_buffer_size': 2000,
